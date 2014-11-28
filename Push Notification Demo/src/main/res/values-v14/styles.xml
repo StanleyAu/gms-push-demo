@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="Section" parent="AppTheme">
+        <item name="android:textColor">@color/darkSub</item>
+        <item name="android:textSize">16dp</item>
+        <item name="android:textAllCaps">true</item>
+    </style>
+</resources>

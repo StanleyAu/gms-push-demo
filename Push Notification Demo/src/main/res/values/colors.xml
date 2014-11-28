@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="blackBorder">#000</color>
+    <color name="myPrimary">#ff0000</color>
+    <color name="myPrimaryDark">#cc0000</color>
+    <color name="myAccent">#00ccff</color>
+    <color name="darkText">#dd000000</color>
+    <color name="darkSub">#8a000000</color>
+    <color name="darkHint">#42000000</color>
+    <color name="darkDivider">#1e000000</color>
+    <color name="lightText">#ddffffff</color>
+    <color name="lightSub">#8affffff</color>
+    <color name="lightHint">#42ffffff</color>
+    <color name="lightDivider">#1effffff</color>
+</resources>

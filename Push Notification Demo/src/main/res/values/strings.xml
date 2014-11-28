@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">Push Notification Demo</string>
+    <string name="launcher_name">GMS Push Demo</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="action_settings">Settings</string>
+    <string name="hint_senderId">Sender ID</string>
+    <string name="hint_expiry">Expiry</string>
+    <string name="hint_filter">Filter</string>
+    <string name="hint_tag">Tag</string>
+    <string name="hint_message">Message</string>
+    <string name="hint_host">Hostname or IP</string>
+    <string name="hint_port">GMS HTTP Port</string>
+    <string name="hint_apiVersion">API Version</string>
+    <string name="register">Register</string>
+    <string name="test">Test</string>
+    <string name="subscribe">Subscribe</string>
+    <string name="cancel">Cancel</string>
+    <string name="publish">Publish</string>
+    <string name="save">Save</string>
+    <string name="not_registered">Not Registered</string>
+    <string name="gcm">Google Cloud Messaging</string>
+    <string name="gms_notification">GMS Notification Service</string>
+    <string name="gms_settings">GMS Settings</string>
+    <string name="about">About</string>
+    <string name="version">Version</string>
+    <string name="receipt">Received Message</string>
+    <string name="nothing">Nothing yet&#8230; :)</string>
+    <string name="registering">Registering</string>
+    <string name="error">Error</string>
+</resources>
