@@ -1,8 +1,12 @@
 package com.genesys.gms.mobile.push.demo;
 
 import android.app.Application;
+import com.genesys.gms.mobile.push.demo.data.api.GcmManager;
+import com.genesys.gms.mobile.push.demo.data.api.NotificationServiceManager;
+import com.squareup.otto.Bus;
 import dagger.ObjectGraph;
 
+import javax.inject.Inject;
 import java.util.Arrays;
 import java.util.List;
 
@@ -11,10 +15,17 @@ import java.util.List;
  */
 public class App extends Application {
     private ObjectGraph applicationGraph;
+    @Inject GcmManager gcmManager;
+    @Inject NotificationServiceManager notificationServiceManager;
+    @Inject Bus bus;
 
     @Override public void onCreate() {
         super.onCreate();
         applicationGraph = ObjectGraph.create(getModules().toArray());
+        applicationGraph.inject(this);
+
+        bus.register(gcmManager);
+        bus.register(notificationServiceManager);
     }
 
     protected List<Object> getModules() {

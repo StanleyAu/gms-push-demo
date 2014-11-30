@@ -29,9 +29,7 @@ import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationDetails;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationEvent;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationSubscription;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.SubscriptionResponse;
-import com.genesys.gms.mobile.push.demo.data.otto.MyGcmPublishEvent;
-import com.genesys.gms.mobile.push.demo.data.otto.MyGcmReceiveEvent;
-import com.genesys.gms.mobile.push.demo.data.otto.MyGcmRegisterEvent;
+import com.genesys.gms.mobile.push.demo.data.otto.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -52,7 +50,7 @@ import java.util.concurrent.atomic.AtomicInteger;
 public class MainFragment extends BaseFragment {
     @InjectView(R.id.editSenderId) EditText editSenderId;
     @InjectView(R.id.txtRegistration) TextView txtRegistration;
-    @InjectView(R.id.editExpiry) EditText editExpiry;
+    @InjectView(R.id.editExpire) EditText editExpire;
     @InjectView(R.id.editFilter) EditText editFilter;
     @InjectView(R.id.editMessage) EditText editMessage;
     @InjectView(R.id.editTag) EditText editTag;
@@ -69,7 +67,7 @@ public class MainFragment extends BaseFragment {
     @Inject NotificationService notificationService;
     @Inject NotificationManager notificationManager;
 
-    public final static String EXTRA_MESSAGE = "message";
+    public final static String PROPERTY_SENDER_ID = "sender_id";
     public final static String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "appVersion";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
@@ -96,7 +94,7 @@ public class MainFragment extends BaseFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         handleInstanceState(savedInstanceState);
-        checkPlayAndGcm();
+        checkPlayServicesAndGcm();
     }
 
     @Override
@@ -109,7 +107,7 @@ public class MainFragment extends BaseFragment {
     public void onResume() {
         super.onResume();
         bus.register(this);
-        checkPlayAndGcm();
+        checkPlayServicesAndGcm();
     }
 
     @Override
@@ -129,69 +127,6 @@ public class MainFragment extends BaseFragment {
         if(inState==null) {
             return;
         }
-    }
-
-    @OnClick(R.id.btnRegister)
-    public void handleRegister() {
-        btnRegister.setEnabled(false);
-        new RegisterGcmTask().execute(getSenderId());
-    }
-
-    @OnClick(R.id.btnTest)
-    public void handleTest() {
-        btnTest.setEnabled(false);
-        new PublishGcmTask().execute(getSenderId());
-    }
-
-    @OnClick(R.id.btnSubscribe)
-    public void handleSubscribe() {
-        ButterKnife.apply(listGmsButtons, ENABLED, false);
-        String strExpiry = editExpiry.getText().toString();
-        int expiry;
-        try {
-            expiry = Integer.parseInt(strExpiry);
-        } catch (NumberFormatException e) {
-            editExpiry.setText("60");
-            expiry = 60;
-        }
-        String strFilter = editFilter.getText().toString();
-        if(strFilter.isEmpty()) {
-            strFilter = "*";
-            editFilter.setText("*");
-        }
-        // Create an async task (unless we use an rxJava observer)
-        NotificationSubscription params = new NotificationSubscription(
-                getUniqueId(context),
-                null,
-                m_strGcmRegId,
-                null,
-                NotificationDetails.ClientType.GCM,
-                expiry,strFilter
-        );
-        new GmsSubscribeTask().execute(params);
-    }
-
-    @OnClick(R.id.btnCancel)
-    public void handleCancel() {
-        ButterKnife.apply(listGmsButtons, ENABLED, false);
-        new GmsCancelTask().execute(m_strGmsSubId);
-    }
-
-    @OnClick(R.id.btnPublish)
-    public void handlePublish() {
-        ButterKnife.apply(listGmsButtons, ENABLED, false);
-        String strMessage = editMessage.getText().toString();
-        if(strMessage.isEmpty()) {
-            editMessage.setText("Hello world!");
-            strMessage = "Hello world!";
-        }
-        String strTag = editTag.getText().toString();
-        if(strTag.isEmpty()) {
-            editTag.setText("push.demo");
-            strTag = "push.demo";
-        }
-        NotificationEvent params = new NotificationEvent(strMessage, strTag, NotificationEvent.MediaType.STRING);
-        new GmsPublishTask().execute(params);
     }
 
     private boolean checkPlayServices() {
@@ -233,234 +168,149 @@ public class MainFragment extends BaseFragment {
         }
     }
 
-    private NotificationCompat.Builder buildNotificationCommon(Context context) {
-        if(mBuilder == null) {
-            mBuilder = new NotificationCompat.Builder(context)
-                .setContentTitle("GMS Push Demo")
-                .setContentText("Notification received!");
-            Uri alarmSound = RingtoneManager.getDefaultUri(RingtoneManager.TYPE_NOTIFICATION);
-            mBuilder.setSound(alarmSound);
-        }
-        return mBuilder;
-    }
-
     private static String getUniqueId(Context context) {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
-    }
-
-    private void registerInBackground() {
-        new RegisterGcmTask().execute(getSenderId());
-    }
-
-    private void publishInBackground() {
-        new PublishGcmTask().execute(getSenderId());
     }
 
     private void storeRegistrationId(Context context, String regId) {
         int appVersion = getAppVersion(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
         editor.putString(PROPERTY_REG_ID, regId);
+        editor.putString(PROPERTY_SENDER_ID, getSenderId());
         editor.putInt(PROPERTY_APP_VERSION, appVersion);
         editor.apply();
     }
 
-    private void checkPlayAndGcm() {
+    private void checkPlayServicesAndGcm() {
         if(checkPlayServices()){
             btnRegister.setEnabled(true);
             m_strGcmRegId = getRegistrationId(context);
-            txtRegistration.setText(m_strGcmRegId);
             if(!m_strGcmRegId.isEmpty()) {
                 btnTest.setEnabled(true);
+                txtRegistration.setText(m_strGcmRegId);
             }
+            editSenderId.setText(sharedPreferences.getString(PROPERTY_SENDER_ID, ""));
         }
     }
 
+    /**     FIELD GETTERS **/
     private String getSenderId() {
-        if(editSenderId!=null) {
-            return editSenderId.getText().toString();
+        return editSenderId.getText().toString();
+    }
+
+    private int getExpire() {
+        String tmp = editExpire.getText().toString();
+        try {
+            return Integer.parseInt(tmp);
+        } catch (NumberFormatException e) {
+            editExpire.setText("60");
+            return 60;
         }
-        return "";
     }
 
-    @Subscribe public void gcmRegistered(MyGcmRegisterEvent event) {
-        if(event.result==true) {
-            txtRegistration.setText(event.registrationId);
-            btnTest.setEnabled(true);
-        } else {
-            txtRegistration.setText(getResources().getString(R.string.error));
+    private String getFilter() {
+        String tmp = editFilter.getText().toString();
+        if(tmp.isEmpty()) {
+            tmp = "*";
+            editFilter.setText(tmp);
         }
-        Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
-        btnRegister.setEnabled(true);
+        return tmp;
     }
 
-    @Subscribe public void gcmPublished(MyGcmPublishEvent event) {
-        Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
-        btnTest.setEnabled(true);
+    private String getMessage() {
+        String tmp = editMessage.getText().toString();
+        if(tmp.isEmpty()) {
+            tmp = "Hello world!";
+            editMessage.setText(tmp);
+        }
+        return tmp;
     }
 
+    private String getMessageTag() {
+        String tmp = editTag.getText().toString();
+        if(tmp.isEmpty()) {
+            tmp = "push.demo";
+            editTag.setText(tmp);
+        }
+        return tmp;
+    }
+    /** END FIELD GETTERS **/
+
+    /**     BUTTON HANDLERS **/
+    @OnClick(R.id.btnRegister)
+    public void handleRegister() {
+        bus.post(new GcmRegisterEvent(getSenderId()));
+    }
+    @OnClick(R.id.btnTest)
+    public void handleTest() {
+        Bundle data = new Bundle();
+        data.putString("my_message", "Hello world!");
+        bus.post(new GcmSendEvent(getSenderId(), data));
+    }
+    @OnClick(R.id.btnSubscribe)
+    public void handleSubscribe() {
+        String identifier = getUniqueId(context);
+        NotificationSubscription notificationSubscription = new NotificationSubscription(
+                identifier,
+                null,
+                m_strGcmRegId,
+                null,
+                NotificationDetails.ClientType.GCM,
+                getExpire(),
+                getFilter()
+        );
+        bus.post(new NotificationSubscribeEvent(identifier, notificationSubscription));
+    }
+    @OnClick(R.id.btnCancel)
+    public void handleCancel() {
+        bus.post(new NotificationDeleteEvent(m_strGmsSubId));
+    }
+    @OnClick(R.id.btnPublish)
+    public void handlePublish() {
+        NotificationEvent notificationEvent = new NotificationEvent(
+                getMessage(),
+                getMessageTag(),
+                NotificationEvent.MediaType.STRING,
+                m_strGcmRegId,
+                NotificationDetails.ClientType.GCM,
+                null
+        );
+        bus.post(new NotificationPublishEvent(notificationEvent));
+    }
+    /** END BUTTON HANDLERS **/
+
+    @Subscribe public void onGcmRegisterDone(GcmRegisterDoneEvent event) {
+        m_strGcmRegId = event.registrationId;
+        storeRegistrationId(context, m_strGcmRegId);
+        txtRegistration.setText(event.registrationId);
+        Toast.makeText(context, "Registered (id:" + event.registrationId + ")", Toast.LENGTH_SHORT).show();
+    }
+    @Subscribe public void onGcmSendDone(GcmSendDoneEvent event) {
+        Toast.makeText(context, "Upstream message delivered.", Toast.LENGTH_SHORT).show();
+    }
+    @Subscribe public void onGcmUnregisterDone(GcmUnregisterDoneEvent event) {
+        Toast.makeText(context, "Unregistered", Toast.LENGTH_SHORT).show();
+    }
+    @Subscribe public void onGcmError(GcmErrorEvent event) {
+        Toast.makeText(context, "GCM Error: " + event.error.getMessage(), Toast.LENGTH_SHORT).show();
+    }
     @Subscribe public void gcmReceived(MyGcmReceiveEvent event) {
         txtReceipt.setText(event.extras.toString());
-        //notificationManager.notify(m_notifyId.incrementAndGet(), buildNotificationCommon(context).build());
         Toast.makeText(context, "Message received!", Toast.LENGTH_SHORT).show();
     }
 
-    private class RegisterGcmTask extends AsyncTask<String, Void, MyGcmRegisterEvent> {
-        @Override
-        protected MyGcmRegisterEvent doInBackground(String... params) {
-            MyGcmRegisterEvent event = new MyGcmRegisterEvent();
-            if(params.length==0) {
-                event.message = "No parameters provided.";
-                event.result = false;
-                return event;
-            }
-            String gcmRegId;
-            String senderId = params[0];
-            if(senderId.isEmpty()) {
-                event.message = "Sender ID is not set.";
-                event.result = false;
-                return event;
-            }
-            try {
-                event.registrationId = googleCloudMessaging.register(senderId);
-                event.message = "Device registered, registration ID=" + event.registrationId;
-                event.result = true;
-                storeRegistrationId(context, event.registrationId);
-            } catch (IOException e) {
-                event.message = "Failed to register: " + e.getMessage();
-                event.result = false;
-            }
-            return event;
-        }
-
-        @Override
-        protected void onPostExecute(MyGcmRegisterEvent result) {
-            bus.post(result);
-        }
+    @Subscribe public void onNotificationSubscribeDone(NotificationSubscribeDoneEvent event) {
+        m_strGmsSubId = event.subscriptionResponse.getId();
+        Toast.makeText(context, "Subscribed (id:" + event.subscriptionResponse.getId() + ")", Toast.LENGTH_SHORT).show();
     }
-
-    /** This Publish goes back to server **/
-    private class PublishGcmTask extends AsyncTask<String, Void, MyGcmPublishEvent> {
-        @Override
-        protected MyGcmPublishEvent doInBackground(String... params) {
-            MyGcmPublishEvent event = new MyGcmPublishEvent();
-            if(params.length==0) {
-                event.message = "No parameters provided.";
-                event.result = false;
-                return event;
-            }
-            String senderId = params[0];
-            if(senderId.isEmpty()) {
-                event.message = "Sender ID is not set.";
-                event.result = false;
-                return event;
-            }
-            try {
-                Bundle data = new Bundle();
-                data.putString("my_message", "Hello World");
-                String id = Integer.toString(m_msgId.incrementAndGet());
-                googleCloudMessaging.send(getSenderId() + "@gcm.googleapis.com", id, data);
-                event.message = "Sent message";
-                event.result = true;
-            } catch (IOException e) {
-                event.message = "Failed to send: " + e.getMessage();
-                event.result = false;
-            }
-            return event;
-        }
-        @Override
-        protected void onPostExecute(MyGcmPublishEvent result) {
-            bus.post(result);
-        }
+    @Subscribe public void onNotificationDeleteDone(NotificationDeleteDoneEvent event) {
+        m_strGmsSubId = null;
+        Toast.makeText(context, "Subscription deleted.", Toast.LENGTH_SHORT).show();
     }
-
-    private class GmsSubscribeTask extends AsyncTask<NotificationSubscription, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-        @Override
-        protected Void doInBackground(NotificationSubscription... params) {
-            NotificationSubscription param = params[0];
-            try {
-                SubscriptionResponse response = notificationService.subscribe(getUniqueId(context), param);
-                Log.d("TEST", response.toString());
-            } catch (RetrofitError e) {
-                if (e.getResponse() != null) {
-                    String json = new String(((TypedByteArray) e.getResponse().getBody()).getBytes());
-                    Log.d("TEST", json);
-                } else {
-                    Log.d("TEST", "Null response");
-                }
-            }
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void result) {
-            progressBar.setVisibility(View.GONE);
-            ButterKnife.apply(listGmsButtons, ENABLED, true);
-        }
+    @Subscribe public void onNotificationPublishDone(NotificationPublishDoneEvent event) {
+        Toast.makeText(context, "Message published.", Toast.LENGTH_SHORT).show();
     }
-
-    private class GmsCancelTask extends AsyncTask<String, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-        @Override
-        protected Void doInBackground(String... params) {
-            String subscriptionId = params[0];
-            try {
-                Response response = notificationService.delete(subscriptionId);
-                Log.d("TEST", response.toString());
-            } catch (RetrofitError e) {
-                if (e.getResponse() != null) {
-                    String json = new String(((TypedByteArray) e.getResponse().getBody()).getBytes());
-                    Log.d("TEST", json);
-                } else {
-                    Log.d("TEST", "Null response");
-                }
-            }
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void result) {
-            progressBar.setVisibility(View.GONE);
-            ButterKnife.apply(listGmsButtons, ENABLED, true);
-        }
+    @Subscribe public void onNotificationError(NotificationErrorEvent event) {
+        Toast.makeText(context, "Notification API Error: " + event.error.getMessage(), Toast.LENGTH_SHORT).show();
     }
-
-    private class GmsPublishTask extends AsyncTask<NotificationEvent, Void, Void> {
-        @Override
-        protected void onPreExecute() {
-            progressBar.setVisibility(View.VISIBLE);
-        }
-        @Override
-        protected Void doInBackground(NotificationEvent... params) {
-            NotificationEvent param = params[0];
-            try {
-                Response response = notificationService.publish(param);
-                Log.d("TEST", response.toString());
-            } catch (RetrofitError e) {
-                if (e.getResponse() != null) {
-                    String json = new String(((TypedByteArray) e.getResponse().getBody()).getBytes());
-                    Log.d("TEST", json);
-                } else {
-                    Log.d("TEST", "Null response");
-                }
-            }
-            return null;
-        }
-        @Override
-        protected void onPostExecute(Void result) {
-            progressBar.setVisibility(View.GONE);
-            ButterKnife.apply(listGmsButtons, ENABLED, true);
-        }
-    }
-
-    static final Setter<View, Boolean> ENABLED = new Setter<View, Boolean>() {
-        @Override
-        public void set(View view, Boolean value, int index) {
-            view.setEnabled(value);
-        }
-    };
 }

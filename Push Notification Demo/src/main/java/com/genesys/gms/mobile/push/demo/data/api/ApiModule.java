@@ -1,6 +1,8 @@
 package com.genesys.gms.mobile.push.demo.data.api;
 
+import android.content.SharedPreferences;
 import com.genesys.gms.mobile.push.demo.data.retrofit.GmsEndpoint;
+import com.genesys.gms.mobile.push.demo.ui.SettingsFragment;
 import com.squareup.okhttp.OkHttpClient;
 import dagger.Module;
 import dagger.Provides;
@@ -19,8 +21,15 @@ import javax.inject.Singleton;
 )
 public class ApiModule {
     @Provides @Singleton
-    GmsEndpoint provideEndpoint() {
-        return new GmsEndpoint();
+    GmsEndpoint provideEndpoint(SharedPreferences sharedPreferences) {
+        GmsEndpoint gmsEndpoint = new GmsEndpoint();
+        String host = sharedPreferences.getString(SettingsFragment.PROPERTY_HOST, "");
+        String port = sharedPreferences.getString(SettingsFragment.PROPERTY_PORT, "");
+        int apiVersion = sharedPreferences.getInt(SettingsFragment.PROPERTY_API_VERSION, 1);
+        if(!host.isEmpty() && !port.isEmpty()) {
+            gmsEndpoint.setUrl(host, port, apiVersion);
+        }
+        return gmsEndpoint;
     }
 
     @Provides @Singleton

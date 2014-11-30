@@ -9,6 +9,7 @@ import com.genesys.gms.mobile.push.demo.data.otto.GcmUnregisterEvent;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import hugo.weaving.DebugLog;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
@@ -23,7 +24,7 @@ public class GcmManager {
     private final Bus bus;
     private AtomicInteger idGen = new AtomicInteger();
 
-    @Inject
+    @DebugLog @Inject
     public GcmManager(GoogleCloudMessaging googleCloudMessaging, Bus bus) {
         this.googleCloudMessaging = googleCloudMessaging;
         this.bus = bus;

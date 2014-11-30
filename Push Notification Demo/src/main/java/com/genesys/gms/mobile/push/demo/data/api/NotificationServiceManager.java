@@ -4,6 +4,7 @@ import com.genesys.gms.mobile.push.demo.data.api.pojo.SubscriptionResponse;
 import com.genesys.gms.mobile.push.demo.data.otto.*;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
+import hugo.weaving.DebugLog;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
@@ -19,7 +20,7 @@ public class NotificationServiceManager {
     private final NotificationService notificationService;
     private final Bus bus;
 
-    @Inject
+    @DebugLog @Inject
     public NotificationServiceManager(NotificationService notificationService, Bus bus) {
         this.notificationService = notificationService;
         this.bus = bus;

@@ -1,6 +1,7 @@
 package com.genesys.gms.mobile.push.demo.ui;
 
 import android.content.Context;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -29,6 +30,11 @@ public class SettingsFragment extends BaseFragment {
     @Inject Bus bus;
     @Inject GmsEndpoint gmsEndpoint;
     @Inject @ForApplication Context context;
+    @Inject SharedPreferences sharedPreferences;
+
+    public static final String PROPERTY_HOST = "endpoint_host";
+    public static final String PROPERTY_PORT = "endpoint_port";
+    public static final String PROPERTY_API_VERSION = "api_version";
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -41,6 +47,14 @@ public class SettingsFragment extends BaseFragment {
         ButterKnife.inject(this, view);
 
         return view;
+    }
+
+    @Override
+    public void onActivityCreated(Bundle inState) {
+        super.onActivityCreated(inState);
+        editHost.setText(sharedPreferences.getString(PROPERTY_HOST, ""));
+        editPort.setText(sharedPreferences.getString(PROPERTY_PORT, ""));
+        editApiVersion.setText(Integer.toString(sharedPreferences.getInt(PROPERTY_API_VERSION, 1)));
     }
 
     @Override
@@ -67,7 +81,15 @@ public class SettingsFragment extends BaseFragment {
         }
         gmsEndpoint.setUrl(host, port, version);
         // TODO: Notify activity to change fragments
-        // TODO: Persist configuration in SharedPreferences
+        storeHostSettings(host, port, version);
         Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+    }
+
+    private void storeHostSettings(String host, String port, int version) {
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putString(PROPERTY_HOST, host);
+        editor.putString(PROPERTY_PORT, port);
+        editor.putInt(PROPERTY_API_VERSION, version);
+        editor.apply();
     }
 }

@@ -111,7 +111,7 @@
             android:layout_height="wrap_content"
             android:inputType="number"
             android:ems="10"
-            android:id="@+id/editExpiry"
+            android:id="@+id/editExpire"
             android:layout_below="@+id/linearLayout"
             android:hint="@string/hint_expiry" />
 
@@ -119,7 +119,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:id="@+id/editFilter"
-            android:layout_below="@+id/editExpiry"
+            android:layout_below="@+id/editExpire"
             android:hint="@string/hint_filter" />
 
         <EditText
