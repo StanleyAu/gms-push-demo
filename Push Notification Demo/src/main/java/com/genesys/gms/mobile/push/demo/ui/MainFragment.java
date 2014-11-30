@@ -26,11 +26,12 @@ import com.genesys.gms.mobile.push.demo.ForActivity;
 import com.genesys.gms.mobile.push.demo.R;
 import com.genesys.gms.mobile.push.demo.data.api.NotificationService;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationDetails;
-import com.genesys.gms.mobile.push.demo.data.api.pojo.PushEvent;
-import com.genesys.gms.mobile.push.demo.data.api.pojo.SubscribeParams;
-import com.genesys.gms.mobile.push.demo.data.otto.GcmPublishEvent;
-import com.genesys.gms.mobile.push.demo.data.otto.GcmReceiveEvent;
-import com.genesys.gms.mobile.push.demo.data.otto.GcmRegisterEvent;
+import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationEvent;
+import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationSubscription;
+import com.genesys.gms.mobile.push.demo.data.api.pojo.SubscriptionResponse;
+import com.genesys.gms.mobile.push.demo.data.otto.MyGcmPublishEvent;
+import com.genesys.gms.mobile.push.demo.data.otto.MyGcmReceiveEvent;
+import com.genesys.gms.mobile.push.demo.data.otto.MyGcmRegisterEvent;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
@@ -41,7 +42,6 @@ import retrofit.client.Response;
 import retrofit.mime.TypedByteArray;
 
 import javax.inject.Inject;
-import java.awt.font.NumericShaper;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -146,24 +146,28 @@ public class MainFragment extends BaseFragment {
     @OnClick(R.id.btnSubscribe)
     public void handleSubscribe() {
         ButterKnife.apply(listGmsButtons, ENABLED, false);
-        SubscribeParams params = new SubscribeParams();
         String strExpiry = editExpiry.getText().toString();
+        int expiry;
         try {
-            params.expire = Integer.parseInt(strExpiry);
+            expiry = Integer.parseInt(strExpiry);
         } catch (NumberFormatException e) {
             editExpiry.setText("60");
-            params.expire = 60;
+            expiry = 60;
         }
         String strFilter = editFilter.getText().toString();
         if(strFilter.isEmpty()) {
             strFilter = "*";
             editFilter.setText("*");
         }
-        params.filter = strFilter;
-        params.notificationDetails.deviceId = m_strGcmRegId;
-        params.notificationDetails.type = NotificationDetails.ClientType.GCM;
-        params.subscriberId = getUniqueId(context);
         // Create an async task (unless we use an rxJava observer)
+        NotificationSubscription params = new NotificationSubscription(
+                getUniqueId(context),
+                null,
+                m_strGcmRegId,
+                null,
+                NotificationDetails.ClientType.GCM,
+                expiry,strFilter
+        );
         new GmsSubscribeTask().execute(params);
     }
 
@@ -176,21 +180,17 @@ public class MainFragment extends BaseFragment {
     @OnClick(R.id.btnPublish)
     public void handlePublish() {
         ButterKnife.apply(listGmsButtons, ENABLED, false);
-        PushEvent params = new PushEvent();
         String strMessage = editMessage.getText().toString();
         if(strMessage.isEmpty()) {
             editMessage.setText("Hello world!");
             strMessage = "Hello world!";
         }
-        params.message = strMessage;
         String strTag = editTag.getText().toString();
         if(strTag.isEmpty()) {
             editTag.setText("push.demo");
             strTag = "push.demo";
         }
-        params.tag = strTag;
-        params.mediaType = PushEvent.MediaType.STRING;
-        // Create an async task
+        NotificationEvent params = new NotificationEvent(strMessage, strTag, NotificationEvent.MediaType.STRING);
         new GmsPublishTask().execute(params);
     }
 
@@ -282,7 +282,7 @@ public class MainFragment extends BaseFragment {
         return "";
     }
 
-    @Subscribe public void gcmRegistered(GcmRegisterEvent event) {
+    @Subscribe public void gcmRegistered(MyGcmRegisterEvent event) {
         if(event.result==true) {
             txtRegistration.setText(event.registrationId);
             btnTest.setEnabled(true);
@@ -293,21 +293,21 @@ public class MainFragment extends BaseFragment {
         btnRegister.setEnabled(true);
     }
 
-    @Subscribe public void gcmPublished(GcmPublishEvent event) {
+    @Subscribe public void gcmPublished(MyGcmPublishEvent event) {
         Toast.makeText(context, event.message, Toast.LENGTH_SHORT).show();
         btnTest.setEnabled(true);
     }
 
-    @Subscribe public void gcmReceived(GcmReceiveEvent event) {
+    @Subscribe public void gcmReceived(MyGcmReceiveEvent event) {
         txtReceipt.setText(event.extras.toString());
         //notificationManager.notify(m_notifyId.incrementAndGet(), buildNotificationCommon(context).build());
         Toast.makeText(context, "Message received!", Toast.LENGTH_SHORT).show();
     }
 
-    private class RegisterGcmTask extends AsyncTask<String, Void, GcmRegisterEvent> {
+    private class RegisterGcmTask extends AsyncTask<String, Void, MyGcmRegisterEvent> {
         @Override
-        protected GcmRegisterEvent doInBackground(String... params) {
-            GcmRegisterEvent event = new GcmRegisterEvent();
+        protected MyGcmRegisterEvent doInBackground(String... params) {
+            MyGcmRegisterEvent event = new MyGcmRegisterEvent();
             if(params.length==0) {
                 event.message = "No parameters provided.";
                 event.result = false;
@@ -333,16 +333,16 @@ public class MainFragment extends BaseFragment {
         }
 
         @Override
-        protected void onPostExecute(GcmRegisterEvent result) {
+        protected void onPostExecute(MyGcmRegisterEvent result) {
             bus.post(result);
         }
     }
 
     /** This Publish goes back to server **/
-    private class PublishGcmTask extends AsyncTask<String, Void, GcmPublishEvent> {
+    private class PublishGcmTask extends AsyncTask<String, Void, MyGcmPublishEvent> {
         @Override
-        protected GcmPublishEvent doInBackground(String... params) {
-            GcmPublishEvent event = new GcmPublishEvent();
+        protected MyGcmPublishEvent doInBackground(String... params) {
+            MyGcmPublishEvent event = new MyGcmPublishEvent();
             if(params.length==0) {
                 event.message = "No parameters provided.";
                 event.result = false;
@@ -368,21 +368,21 @@ public class MainFragment extends BaseFragment {
             return event;
         }
         @Override
-        protected void onPostExecute(GcmPublishEvent result) {
+        protected void onPostExecute(MyGcmPublishEvent result) {
             bus.post(result);
         }
     }
 
-    private class GmsSubscribeTask extends AsyncTask<SubscribeParams, Void, Void> {
+    private class GmsSubscribeTask extends AsyncTask<NotificationSubscription, Void, Void> {
         @Override
         protected void onPreExecute() {
             progressBar.setVisibility(View.VISIBLE);
         }
         @Override
-        protected Void doInBackground(SubscribeParams... params) {
-            SubscribeParams param = params[0];
+        protected Void doInBackground(NotificationSubscription... params) {
+            NotificationSubscription param = params[0];
             try {
-                Response response = notificationService.subscribe(getUniqueId(context), param);
+                SubscriptionResponse response = notificationService.subscribe(getUniqueId(context), param);
                 Log.d("TEST", response.toString());
             } catch (RetrofitError e) {
                 if (e.getResponse() != null) {
@@ -429,14 +429,14 @@ public class MainFragment extends BaseFragment {
         }
     }
 
-    private class GmsPublishTask extends AsyncTask<PushEvent, Void, Void> {
+    private class GmsPublishTask extends AsyncTask<NotificationEvent, Void, Void> {
         @Override
         protected void onPreExecute() {
             progressBar.setVisibility(View.VISIBLE);
         }
         @Override
-        protected Void doInBackground(PushEvent... params) {
-            PushEvent param = params[0];
+        protected Void doInBackground(NotificationEvent... params) {
+            NotificationEvent param = params[0];
             try {
                 Response response = notificationService.publish(param);
                 Log.d("TEST", response.toString());

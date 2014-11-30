@@ -1,10 +1,9 @@
 package com.genesys.gms.mobile.push.demo.data.push;
 
-import android.app.IntentService;
 import android.content.Intent;
 import android.os.Bundle;
 import com.genesys.gms.mobile.push.demo.BaseIntentService;
-import com.genesys.gms.mobile.push.demo.data.otto.GcmReceiveEvent;
+import com.genesys.gms.mobile.push.demo.data.otto.MyGcmReceiveEvent;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.squareup.otto.Bus;
 
@@ -27,7 +26,7 @@ public class GcmIntentService extends BaseIntentService {
         String messageType = gcm.getMessageType(intent);
 
         if(!extras.isEmpty()) {
-            GcmReceiveEvent event = new GcmReceiveEvent();
+            MyGcmReceiveEvent event = new MyGcmReceiveEvent();
             event.extras = extras;
             if(GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 // Send error
