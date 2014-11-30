@@ -15,6 +15,7 @@ public interface NotificationService {
     public SubscriptionResponse subscribe(@Header("gms_user") String gmsUser,
                                           @Body NotificationSubscription notificationSubscription);
 
+    // Callback parameter tells Retrofit to handle request asynchronously
     @POST("/notification/subscription")
     public void subscribe(@Header("gms_user") String gmsUser,
                           @Body NotificationSubscription notificationSubscription,
