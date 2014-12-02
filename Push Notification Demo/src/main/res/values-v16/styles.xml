@@ -4,4 +4,8 @@
         <item name="android:textAllCaps">true</item>
         <item name="android:fontFamily">@string/font_fontFamily_medium</item>
     </style>
+
+    <style name="Code" parent="CodeBase">
+        <item name="android:fontFamily">@string/font_fontFamily_mono</item>
+    </style>
 </resources>

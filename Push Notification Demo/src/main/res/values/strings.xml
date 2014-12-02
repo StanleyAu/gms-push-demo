@@ -36,4 +36,9 @@
     <string name="nothing">Nothing yet&#8230; :)</string>
     <string name="registering">Registering</string>
     <string name="error">Error</string>
+
+    <string name="logcat_item_description">Request Type</string>
+    <string name="Example"><![CDATA[
+    HTTP POST http://ec2-54-147-250-15.compute-1.amazonaws.com:8080/genesys/1/subscription\nContent-Type: application/json\nContent:\n{\n    "foo":"bar"\n}
+    ]]></string>
 </resources>

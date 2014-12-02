@@ -8,15 +8,9 @@
         android:id="@+id/container"
         android:layout_width="match_parent"
         android:layout_height="match_parent" />
-    <ScrollView
-        android:id="@+id/left_drawer"
+    <android.support.v7.widget.RecyclerView
+        android:id="@+id/recycler_logcat"
+        android:scrollbars="vertical"
         android:layout_width="@dimen/drawer_width"
-        android:layout_height="match_parent"
-        android:layout_gravity="start"
-        android:background="?android:attr/colorBackground">
-        <FrameLayout
-            android:id="@+id/debug_container"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content" />
-        </ScrollView>
+        android:layout_height="match_parent" />
 </android.support.v4.widget.DrawerLayout>
