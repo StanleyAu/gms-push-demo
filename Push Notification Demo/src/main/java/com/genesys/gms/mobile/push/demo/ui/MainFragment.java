@@ -10,14 +10,11 @@ import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.*;
 import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
-import butterknife.OnTouch;
 import com.genesys.gms.mobile.push.demo.BaseFragment;
 import com.genesys.gms.mobile.push.demo.ForActivity;
 import com.genesys.gms.mobile.push.demo.R;
@@ -45,6 +42,7 @@ public class MainFragment extends BaseFragment {
     @InjectView(R.id.editTag) EditText editTag;
     @InjectView(R.id.txtReceipt) TextView txtReceipt;
     @InjectView(R.id.btnRegister) Button btnRegister;
+    @InjectView(R.id.btnUnregister) Button btnUnregister;
     @InjectView(R.id.btnTest) Button btnTest;
 
     @Inject @ForActivity Context context;
@@ -61,6 +59,7 @@ public class MainFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -76,6 +75,12 @@ public class MainFragment extends BaseFragment {
         super.onActivityCreated(savedInstanceState);
         handleInstanceState(savedInstanceState);
         checkPlayServicesAndGcm();
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_main, menu);
     }
 
     @Override
@@ -155,22 +160,32 @@ public class MainFragment extends BaseFragment {
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 
-    private void storeRegistrationId(Context context, String regId) {
+    private synchronized void storeRegistrationId(Context context, String regId) {
+        m_strGcmRegId = regId;
         int appVersion = getAppVersion(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        editor.putString(PROPERTY_REG_ID, regId);
-        editor.putString(PROPERTY_SENDER_ID, getSenderId());
-        editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        if(regId==null) {
+            btnRegister.setEnabled(true);
+            editor.remove(PROPERTY_REG_ID);
+            editor.remove(PROPERTY_APP_VERSION);
+        } else {
+            btnUnregister.setEnabled(true);
+            editor.putString(PROPERTY_REG_ID, regId);
+            editor.putString(PROPERTY_SENDER_ID, getSenderId());
+            editor.putInt(PROPERTY_APP_VERSION, appVersion);
+        }
         editor.apply();
     }
 
     private void checkPlayServicesAndGcm() {
         if(checkPlayServices()){
-            btnRegister.setEnabled(true);
             m_strGcmRegId = getRegistrationId(context);
             if(!m_strGcmRegId.isEmpty()) {
                 btnTest.setEnabled(true);
+                btnUnregister.setEnabled(true);
                 txtRegistration.setText(m_strGcmRegId);
+            } else {
+                btnRegister.setEnabled(true);
             }
             editSenderId.setText(sharedPreferences.getString(PROPERTY_SENDER_ID, ""));
         }
@@ -222,7 +237,13 @@ public class MainFragment extends BaseFragment {
     /**     BUTTON HANDLERS **/
     @OnClick(R.id.btnRegister)
     public void handleRegister() {
+        btnRegister.setEnabled(false);
         bus.post(new GcmRegisterEvent(getSenderId()));
+    }
+    @OnClick(R.id.btnUnregister)
+    public void handleUnregister() {
+        btnUnregister.setEnabled(false);
+        bus.post(new GcmUnregisterEvent());
     }
     @OnClick(R.id.btnTest)
     public void handleTest() {
@@ -261,8 +282,8 @@ public class MainFragment extends BaseFragment {
         bus.post(new NotificationPublishEvent(notificationEvent));
     }
     @TargetApi(11)
-    @OnTouch(R.id.txtRegistration)
-    public boolean handleRegistrationTouch() {
+    @OnClick(R.id.txtRegistration)
+    public void handleRegistrationTouch() {
         try {
             int sdk = Build.VERSION.SDK_INT;
             if (sdk < Build.VERSION_CODES.HONEYCOMB) {
@@ -274,16 +295,13 @@ public class MainFragment extends BaseFragment {
                 clipboard.setPrimaryClip(clip);
             }
             Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show();
-            return true;
         } catch (Exception e) {
-            return false;
         }
     }
     /** END BUTTON HANDLERS **/
 
     @Subscribe public void onGcmRegisterDone(GcmRegisterDoneEvent event) {
-        m_strGcmRegId = event.registrationId;
-        storeRegistrationId(context, m_strGcmRegId);
+        storeRegistrationId(context, event.registrationId);
         txtRegistration.setText(event.registrationId);
         Toast.makeText(context, "Registered (id:" + event.registrationId + ")", Toast.LENGTH_SHORT).show();
     }
@@ -291,9 +309,14 @@ public class MainFragment extends BaseFragment {
         Toast.makeText(context, "Upstream message delivered.", Toast.LENGTH_SHORT).show();
     }
     @Subscribe public void onGcmUnregisterDone(GcmUnregisterDoneEvent event) {
+        storeRegistrationId(context, null);
+        txtRegistration.setText(getResources().getString(R.string.not_registered));
         Toast.makeText(context, "Unregistered", Toast.LENGTH_SHORT).show();
     }
     @Subscribe public void onGcmError(GcmErrorEvent event) {
+        // Reset the buttons just in case
+        btnRegister.setEnabled(true);
+        btnUnregister.setEnabled(true);
         Toast.makeText(context, "GCM Error: " + event.error.getMessage(), Toast.LENGTH_SHORT).show();
     }
     @Subscribe public void gcmReceived(GcmReceiveEvent event) {

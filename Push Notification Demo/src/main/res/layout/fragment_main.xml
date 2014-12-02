@@ -1,10 +1,8 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:card_view="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    tools:context=".MainActivity$PlaceholderFragment">
+    android:layout_height="match_parent">
     <RelativeLayout
         android:focusable="true"
         android:focusableInTouchMode="true"
@@ -69,6 +67,14 @@
                         android:layout_height="wrap_content"
                         android:text="@string/register"
                         android:id="@+id/btnRegister"
+                        android:enabled="false"
+                        style="@style/FlatButton"/>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/unregister"
+                        android:id="@+id/btnUnregister"
                         android:enabled="false"
                         style="@style/FlatButton"/>
 

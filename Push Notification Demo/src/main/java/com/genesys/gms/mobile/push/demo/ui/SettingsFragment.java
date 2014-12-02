@@ -3,9 +3,7 @@ package com.genesys.gms.mobile.push.demo.ui;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Bundle;
-import android.view.LayoutInflater;
-import android.view.View;
-import android.view.ViewGroup;
+import android.view.*;
 import android.widget.EditText;
 import android.widget.Toast;
 import butterknife.ButterKnife;
@@ -38,6 +36,7 @@ public class SettingsFragment extends BaseFragment {
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        setHasOptionsMenu(true);
     }
 
     @Override
@@ -54,6 +53,12 @@ public class SettingsFragment extends BaseFragment {
         editHost.setText(sharedPreferences.getString(PROPERTY_HOST, ""));
         editPort.setText(sharedPreferences.getString(PROPERTY_PORT, ""));
         editApiVersion.setText(Integer.toString(sharedPreferences.getInt(PROPERTY_API_VERSION, 1)));
+    }
+
+    @Override
+    public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
+        super.onCreateOptionsMenu(menu, inflater);
+        inflater.inflate(R.menu.menu_settings, menu);
     }
 
     @Override

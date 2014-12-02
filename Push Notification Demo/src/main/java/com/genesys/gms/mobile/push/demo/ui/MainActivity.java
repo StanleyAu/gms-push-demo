@@ -4,6 +4,7 @@ import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
 import android.view.Menu;
 import android.view.MenuItem;
@@ -16,7 +17,6 @@ import javax.inject.Inject;
 
 public class MainActivity extends BaseActivity {
     @Inject Bus bus;
-    Fragment currentFragment;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -34,9 +34,8 @@ public class MainActivity extends BaseActivity {
 
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
-            currentFragment = new MainFragment();
             getSupportFragmentManager().beginTransaction()
-                    .add(R.id.container, currentFragment)
+                    .add(R.id.container, new MainFragment())
                     .commit();
         }
     }
@@ -60,13 +59,6 @@ public class MainActivity extends BaseActivity {
     }
 
     @Override
-    public boolean onCreateOptionsMenu(Menu menu) {
-        // Inflate the menu; this adds items to the action bar if it is present.
-        getMenuInflater().inflate(R.menu.menu_main, menu);
-        return true;
-    }
-
-    @Override
     public boolean onOptionsItemSelected(MenuItem item) {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
@@ -75,12 +67,13 @@ public class MainActivity extends BaseActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
-            currentFragment = new SettingsFragment();
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
-            transaction.replace(R.id.container, currentFragment);
+            transaction.replace(R.id.container, new SettingsFragment());
             transaction.addToBackStack(null);
             transaction.commit();
             return true;
+        } else if (id == R.id.action_done) {
+            getSupportFragmentManager().popBackStack();
         }
 
         return super.onOptionsItemSelected(item);

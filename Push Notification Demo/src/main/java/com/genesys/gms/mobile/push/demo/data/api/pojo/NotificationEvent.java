@@ -34,7 +34,11 @@ public class NotificationEvent {
         this.message = message;
         this.tag = tag;
         this.mediaType = mediaType;
-        this.notificationDetails = new NotificationDetails(deviceId, properties, clientType);
+        if(deviceId != null) {
+            this.notificationDetails = new NotificationDetails(deviceId, properties, clientType);
+        } else {
+            this.notificationDetails = null;
+        }
     }
 
     public String getMessage() {
