@@ -5,6 +5,7 @@ import com.genesys.gms.mobile.push.demo.data.api.GcmManager;
 import com.genesys.gms.mobile.push.demo.data.api.NotificationServiceManager;
 import com.squareup.otto.Bus;
 import dagger.ObjectGraph;
+import timber.log.Timber;
 
 import javax.inject.Inject;
 import java.util.Arrays;
@@ -23,8 +24,14 @@ public class App extends Application {
         super.onCreate();
         applicationGraph = ObjectGraph.create(getModules().toArray());
         applicationGraph.inject(this);
-
         registerManagers();
+
+        if (BuildConfig.DEBUG) {
+            Timber.plant(new Timber.DebugTree());
+        } else {
+            // TODO: Figure out release logging
+            Timber.plant(new Timber.HollowTree());
+        }
     }
 
     public void registerManagers() {
@@ -45,3 +52,6 @@ public class App extends Application {
         return applicationGraph;
     }
 }
+
+// TODO: Show POST messages for easy copy-pasta/referencing
+// TODO: Improve documentation for redistribution

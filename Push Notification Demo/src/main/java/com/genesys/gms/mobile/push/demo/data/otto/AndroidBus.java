@@ -7,6 +7,9 @@ import com.squareup.otto.ThreadEnforcer;
 
 /**
  * Created by stau on 11/28/2014.
+ *
+ * Subclassing Otto bus for cross-thread use (specifically, for the IntentService)
+ * See solution as provided by Jake Wharton: https://github.com/square/otto/issues/38
  */
 public class AndroidBus extends Bus {
     private final Handler handler = new Handler(Looper.getMainLooper());

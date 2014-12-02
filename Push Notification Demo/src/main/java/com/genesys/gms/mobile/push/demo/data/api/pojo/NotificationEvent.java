@@ -34,10 +34,10 @@ public class NotificationEvent {
         this.message = message;
         this.tag = tag;
         this.mediaType = mediaType;
-        if(deviceId != null) {
-            this.notificationDetails = new NotificationDetails(deviceId, properties, clientType);
-        } else {
+        if(deviceId.isEmpty()) {
             this.notificationDetails = null;
+        } else {
+            this.notificationDetails = new NotificationDetails(deviceId, properties, clientType);
         }
     }
 

@@ -19,7 +19,7 @@ public abstract class BaseIntentService extends IntentService {
         super(name);
     }
 
-    @DebugLog @Override
+    @Override
     public void onCreate() {
         super.onCreate();
         App application = (App)getApplication();

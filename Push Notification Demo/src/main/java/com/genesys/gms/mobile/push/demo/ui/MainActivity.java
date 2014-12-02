@@ -12,9 +12,14 @@ import com.genesys.gms.mobile.push.demo.BaseActivity;
 import com.genesys.gms.mobile.push.demo.R;
 import com.genesys.gms.mobile.push.demo.data.push.GcmIntentService;
 import com.squareup.otto.Bus;
+import timber.log.Timber;
 
 import javax.inject.Inject;
 
+/**
+ * The main application activity is only responsible for inflating fragments
+ * and handling Option Menu selections.
+ */
 public class MainActivity extends BaseActivity {
     @Inject Bus bus;
 
@@ -27,6 +32,8 @@ public class MainActivity extends BaseActivity {
             // Determine if activity was started as a result of GCM notification
             int notificationId = extras.getInt(GcmIntentService.GCM_NOTIFICATION_ID, -1);
             if(notificationId != -1) {
+                Timber.i("Clearing notification with ID %d from drawer.", notificationId);
+                // Remove the notification from the Notification Drawer
                 NotificationManager manager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
                 manager.cancel(notificationId);
             }
@@ -67,12 +74,15 @@ public class MainActivity extends BaseActivity {
 
         //noinspection SimplifiableIfStatement
         if (id == R.id.action_settings) {
+            Timber.i("Switching over to Settings page.");
             FragmentTransaction transaction = getSupportFragmentManager().beginTransaction();
+            transaction.setCustomAnimations(R.anim.enter, R.anim.exit, R.anim.pop_enter, R.anim.pop_exit);
             transaction.replace(R.id.container, new SettingsFragment());
             transaction.addToBackStack(null);
             transaction.commit();
             return true;
         } else if (id == R.id.action_done) {
+            Timber.i("Leaving Settings page.");
             getSupportFragmentManager().popBackStack();
         }
 

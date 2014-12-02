@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="version_code">10002</integer>
-    <string name="version_name">1.0.2</string>
+    <integer name="version_code">10003</integer>
+    <string name="version_name">1.0.3</string>
 
     <string name="app_name">Push Notification Demo</string>
     <string name="launcher_name">GMS Push Demo</string>
@@ -16,6 +16,7 @@
     <string name="hint_host">Hostname or IP</string>
     <string name="hint_port">GMS HTTP Port</string>
     <string name="hint_apiVersion">API Version</string>
+    <string name="checkbox_publish_to_self">Publish to self</string>
     <string name="register">Register</string>
     <string name="unregister">Unregister</string>
     <string name="test">Test</string>

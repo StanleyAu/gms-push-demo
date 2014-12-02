@@ -24,8 +24,8 @@ android {
         applicationId "com.genesys.gms.mobile.push.demo"
         minSdkVersion 9
         targetSdkVersion 21
-        versionCode 10002
-        versionName "1.0.2"
+        versionCode 10003
+        versionName "1.0.3"
     }
     buildTypes {
         release {
@@ -49,4 +49,5 @@ dependencies {
     debugCompile 'com.squareup.retrofit:retrofit-mock:1.7.+'
     compile 'com.squareup:otto:1.3.5'
     compile 'com.jakewharton:butterknife:5.1.+'
+    compile 'com.jakewharton.timber:timber:2.5.+'
 }

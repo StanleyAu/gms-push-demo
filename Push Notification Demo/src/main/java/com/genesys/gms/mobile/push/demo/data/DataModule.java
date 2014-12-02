@@ -29,6 +29,7 @@ public class DataModule {
     static final int DISK_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
     @Provides @Singleton
     Bus provideBus() {
+        // Allows Otto bus registration and posting to occur on any thread
         return new AndroidBus(ThreadEnforcer.ANY);
     }
 
