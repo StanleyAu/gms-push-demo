@@ -1,6 +1,7 @@
 package com.genesys.gms.mobile.push.demo.data.api;
 
 import android.content.SharedPreferences;
+import com.genesys.gms.mobile.push.demo.BuildConfig;
 import com.genesys.gms.mobile.push.demo.data.retrofit.GmsEndpoint;
 import com.genesys.gms.mobile.push.demo.ui.SettingsFragment;
 import com.squareup.okhttp.OkHttpClient;
@@ -9,6 +10,7 @@ import dagger.Provides;
 import retrofit.RestAdapter;
 import retrofit.client.Client;
 import retrofit.client.OkClient;
+import timber.log.Timber;
 
 import javax.inject.Singleton;
 
@@ -39,10 +41,20 @@ public class ApiModule {
 
     @Provides @Singleton
     RestAdapter provideRestAdapter(GmsEndpoint endpoint, Client client) {
-        return new RestAdapter.Builder()
-            .setClient(client)
-            .setEndpoint(endpoint)
-            .build();
+        RestAdapter.Builder builder = new RestAdapter.Builder()
+                .setClient(client)
+                .setEndpoint(endpoint);
+        if(BuildConfig.DEBUG) {
+            builder.setLogLevel(RestAdapter.LogLevel.FULL)
+                .setLog(new RestAdapter.Log() {
+                    @Override
+                    public void log(String msg) {
+                        Timber.tag("Retrofit");
+                        Timber.d(msg);
+                    }
+                });
+        }
+        return builder.build();
     }
 
     @Provides @Singleton

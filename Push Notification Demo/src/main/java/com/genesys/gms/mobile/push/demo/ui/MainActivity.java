@@ -3,11 +3,13 @@ package com.genesys.gms.mobile.push.demo.ui;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.os.Bundle;
-import android.support.v4.app.Fragment;
-import android.support.v4.app.FragmentManager;
 import android.support.v4.app.FragmentTransaction;
-import android.view.Menu;
+import android.support.v4.widget.DrawerLayout;
+import android.support.v7.app.ActionBarDrawerToggle;
 import android.view.MenuItem;
+import android.view.View;
+import butterknife.ButterKnife;
+import butterknife.InjectView;
 import com.genesys.gms.mobile.push.demo.BaseActivity;
 import com.genesys.gms.mobile.push.demo.R;
 import com.genesys.gms.mobile.push.demo.data.push.GcmIntentService;
@@ -22,10 +24,14 @@ import javax.inject.Inject;
  */
 public class MainActivity extends BaseActivity {
     @Inject Bus bus;
+    ActionBarDrawerToggle mDrawerToggle;
+    @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+        setContentView(R.layout.activity_main);
+        ButterKnife.inject(this);
 
         Bundle extras = getIntent().getExtras();
         if(extras != null) {
@@ -39,12 +45,37 @@ public class MainActivity extends BaseActivity {
             }
         }
 
-        setContentView(R.layout.activity_main);
+        mDrawerToggle = new ActionBarDrawerToggle(this, mDrawerLayout, R.string.drawer_open, R.string.drawer_close) {
+            public void onDrawerClosed(View view) {
+                super.onDrawerClosed(view);
+                invalidateOptionsMenu();
+            }
+            public void onDrawerOpened(View view) {
+                super.onDrawerOpened(view);
+                invalidateOptionsMenu();
+            }
+        };
+        mDrawerLayout.setDrawerListener(mDrawerToggle);
+        getSupportActionBar().setDisplayHomeAsUpEnabled(true);
+        getSupportActionBar().setHomeButtonEnabled(true);
+
         if (savedInstanceState == null) {
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, new MainFragment())
                     .commit();
         }
+    }
+
+    @Override
+    public void onPostCreate(Bundle savedInstanceState) {
+        super.onPostCreate(savedInstanceState);
+        mDrawerToggle.syncState();
+    }
+
+    @Override
+    protected void onDestroy() {
+        super.onDestroy();
+        ButterKnife.reset(this);
     }
 
     @Override
@@ -70,6 +101,10 @@ public class MainActivity extends BaseActivity {
         // Handle action bar item clicks here. The action bar will
         // automatically handle clicks on the Home/Up button, so long
         // as you specify a parent activity in AndroidManifest.xml.
+        if (mDrawerToggle.onOptionsItemSelected(item)) {
+            return true;
+        }
+
         int id = item.getItemId();
 
         //noinspection SimplifiableIfStatement
