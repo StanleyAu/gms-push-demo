@@ -7,6 +7,7 @@ import com.genesys.gms.mobile.push.demo.data.otto.AndroidBus;
 import com.squareup.okhttp.Cache;
 import com.squareup.okhttp.OkHttpClient;
 import com.squareup.otto.Bus;
+import com.squareup.otto.ThreadEnforcer;
 import dagger.Module;
 import dagger.Provides;
 
@@ -28,7 +29,7 @@ public class DataModule {
     static final int DISK_CACHE_SIZE = 50 * 1024 * 1024; // 50MB
     @Provides @Singleton
     Bus provideBus() {
-        return new AndroidBus();
+        return new AndroidBus(ThreadEnforcer.ANY);
     }
 
     @Provides @Singleton

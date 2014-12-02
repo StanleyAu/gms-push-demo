@@ -1,48 +1,37 @@
 package com.genesys.gms.mobile.push.demo.ui;
 
-import android.app.NotificationManager;
+import android.annotation.TargetApi;
+import android.content.ClipData;
+import android.content.ClipboardManager;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
-import android.media.RingtoneManager;
-import android.net.Uri;
-import android.os.AsyncTask;
+import android.os.Build;
 import android.os.Bundle;
 import android.provider.Settings.Secure;
-import android.support.v4.app.NotificationCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.*;
 import butterknife.ButterKnife;
-import butterknife.ButterKnife.Setter;
 import butterknife.InjectView;
-import butterknife.InjectViews;
 import butterknife.OnClick;
+import butterknife.OnTouch;
 import com.genesys.gms.mobile.push.demo.BaseFragment;
 import com.genesys.gms.mobile.push.demo.ForActivity;
 import com.genesys.gms.mobile.push.demo.R;
-import com.genesys.gms.mobile.push.demo.data.api.NotificationService;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationDetails;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationEvent;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationSubscription;
-import com.genesys.gms.mobile.push.demo.data.api.pojo.SubscriptionResponse;
 import com.genesys.gms.mobile.push.demo.data.otto.*;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
-import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
-import retrofit.RetrofitError;
-import retrofit.client.Response;
-import retrofit.mime.TypedByteArray;
+import hugo.weaving.DebugLog;
 
 import javax.inject.Inject;
-import java.io.IOException;
-import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by stau on 11/27/2014.
@@ -57,25 +46,17 @@ public class MainFragment extends BaseFragment {
     @InjectView(R.id.txtReceipt) TextView txtReceipt;
     @InjectView(R.id.btnRegister) Button btnRegister;
     @InjectView(R.id.btnTest) Button btnTest;
-    @InjectView(R.id.progressBar) ProgressBar progressBar;
-    @InjectViews({R.id.btnSubscribe, R.id.btnCancel, R.id.btnPublish}) List<View> listGmsButtons;
 
     @Inject @ForActivity Context context;
     @Inject SharedPreferences sharedPreferences;
-    @Inject GoogleCloudMessaging googleCloudMessaging;
     @Inject Bus bus;
-    @Inject NotificationService notificationService;
-    @Inject NotificationManager notificationManager;
 
     public final static String PROPERTY_SENDER_ID = "sender_id";
     public final static String PROPERTY_REG_ID = "registration_id";
-    private static final String PROPERTY_APP_VERSION = "appVersion";
+    private static final String PROPERTY_APP_VERSION = "app_version";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private String m_strGcmRegId;
     private String m_strGmsSubId;
-    AtomicInteger m_msgId = new AtomicInteger();
-    AtomicInteger m_notifyId = new AtomicInteger();
-    private NotificationCompat.Builder mBuilder;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
@@ -103,6 +84,7 @@ public class MainFragment extends BaseFragment {
         ButterKnife.reset(this);
     }
 
+    @DebugLog
     @Override
     public void onResume() {
         super.onResume();
@@ -110,10 +92,11 @@ public class MainFragment extends BaseFragment {
         checkPlayServicesAndGcm();
     }
 
+    @DebugLog
     @Override
     public void onPause() {
-        super.onPause();
         bus.unregister(this);
+        super.onPause();
     }
 
     // TODO: Restore onActivityCreated
@@ -277,6 +260,25 @@ public class MainFragment extends BaseFragment {
         );
         bus.post(new NotificationPublishEvent(notificationEvent));
     }
+    @TargetApi(11)
+    @OnTouch(R.id.txtRegistration)
+    public boolean handleRegistrationTouch() {
+        try {
+            int sdk = Build.VERSION.SDK_INT;
+            if (sdk < Build.VERSION_CODES.HONEYCOMB) {
+                android.text.ClipboardManager clipboard = (android.text.ClipboardManager) context.getSystemService(context.CLIPBOARD_SERVICE);
+                clipboard.setText(txtRegistration.getText().toString());
+            } else {
+                ClipboardManager clipboard = (ClipboardManager) context.getSystemService(Context.CLIPBOARD_SERVICE);
+                ClipData clip = ClipData.newPlainText("Registration ID", txtRegistration.getText().toString());
+                clipboard.setPrimaryClip(clip);
+            }
+            Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show();
+            return true;
+        } catch (Exception e) {
+            return false;
+        }
+    }
     /** END BUTTON HANDLERS **/
 
     @Subscribe public void onGcmRegisterDone(GcmRegisterDoneEvent event) {
@@ -294,9 +296,15 @@ public class MainFragment extends BaseFragment {
     @Subscribe public void onGcmError(GcmErrorEvent event) {
         Toast.makeText(context, "GCM Error: " + event.error.getMessage(), Toast.LENGTH_SHORT).show();
     }
-    @Subscribe public void gcmReceived(MyGcmReceiveEvent event) {
-        txtReceipt.setText(event.extras.toString());
-        Toast.makeText(context, "Message received!", Toast.LENGTH_SHORT).show();
+    @Subscribe public void gcmReceived(GcmReceiveEvent event) {
+        if(event.extras != null) {
+            txtReceipt.setText(event.extras.toString());
+        } else {
+            txtReceipt.setText(event.toString());
+        }
+        if(!event.isProduced()) {
+            Toast.makeText(context, "Message received!", Toast.LENGTH_SHORT).show();
+        }
     }
 
     @Subscribe public void onNotificationSubscribeDone(NotificationSubscribeDoneEvent event) {

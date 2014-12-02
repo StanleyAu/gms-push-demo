@@ -1,8 +1,8 @@
 package com.genesys.gms.mobile.push.demo;
 
 import android.app.IntentService;
-import android.content.Intent;
 import dagger.ObjectGraph;
+import hugo.weaving.DebugLog;
 
 /**
  * Created by stau on 11/27/2014.
@@ -19,7 +19,7 @@ public abstract class BaseIntentService extends IntentService {
         super(name);
     }
 
-    @Override
+    @DebugLog @Override
     public void onCreate() {
         super.onCreate();
         App application = (App)getApplication();

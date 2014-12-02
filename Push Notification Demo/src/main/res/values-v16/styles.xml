@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <style name="FlatButton" parent="FlatButtonBase">
+        <item name="android:textAllCaps">true</item>
+        <item name="android:fontFamily">@string/font_fontFamily_medium</item>
+    </style>
+</resources>

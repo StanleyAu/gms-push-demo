@@ -27,7 +27,6 @@ public class SettingsFragment extends BaseFragment {
     @InjectView(R.id.editPort) EditText editPort;
     @InjectView(R.id.editApiVersion) EditText editApiVersion;
 
-    @Inject Bus bus;
     @Inject GmsEndpoint gmsEndpoint;
     @Inject @ForApplication Context context;
     @Inject SharedPreferences sharedPreferences;
@@ -72,7 +71,7 @@ public class SettingsFragment extends BaseFragment {
             // Invalid, should notify
             return;
         }
-        int version = Integer.MIN_VALUE;
+        int version;
         try {
             version = Integer.parseInt(strApiVersion);
         } catch (NumberFormatException e) {

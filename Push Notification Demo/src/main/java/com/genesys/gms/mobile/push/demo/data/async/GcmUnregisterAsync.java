@@ -3,7 +3,6 @@ package com.genesys.gms.mobile.push.demo.data.async;
 import android.os.AsyncTask;
 import com.genesys.gms.mobile.push.demo.data.otto.GcmErrorEvent;
 import com.genesys.gms.mobile.push.demo.data.otto.GcmUnregisterDoneEvent;
-import com.genesys.gms.mobile.push.demo.data.otto.GcmUnregisterEvent;
 import com.google.android.gms.gcm.GoogleCloudMessaging;
 import com.squareup.otto.Bus;
 

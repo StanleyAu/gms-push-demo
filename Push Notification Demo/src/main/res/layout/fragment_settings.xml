@@ -2,20 +2,16 @@
 
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     android:orientation="vertical"
     android:layout_height="wrap_content"
     android:layout_width="wrap_content">
     <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_settings"
-        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="8dp"
-        android:layout_marginBottom="4dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        card_view:cardCornerRadius="2dp">
+        card_view:cardCornerRadius="@dimen/card_corner_radius"
+        style="@style/CardTop">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -23,7 +19,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:padding="@dimen/content_padding">
                 <TextView
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -41,7 +37,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:padding="@dimen/content_padding">
                 <EditText
                     android:layout_width="match_parent"
                     android:layout_height="wrap_content"
@@ -67,28 +63,31 @@
                     android:hint="@string/hint_apiVersion"
                     android:inputType="number"
                     android:layout_below="@+id/editPort" />
+            </RelativeLayout>
+            <View
+                android:layout_height="1dp"
+                android:layout_width="match_parent"
+                android:background="@color/darkDivider" />
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:padding="@dimen/button_container_padding">
                 <Button
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="@string/save"
                     android:id="@+id/btnSave"
-                    android:layout_alignParentRight="true"
-                    android:layout_alignParentEnd="true"
-                    android:layout_below="@+id/editApiVersion"/>
-            </RelativeLayout>
+                    style="@style/FlatButton"/>
+                </LinearLayout>
         </LinearLayout>
     </android.support.v7.widget.CardView>
     <android.support.v7.widget.CardView
-        xmlns:card_view="http://schemas.android.com/apk/res-auto"
         android:id="@+id/card_about"
-        android:layout_gravity="center"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_marginTop="4dp"
-        android:layout_marginBottom="8dp"
-        android:layout_marginLeft="8dp"
-        android:layout_marginRight="8dp"
-        card_view:cardCornerRadius="2dp">
+        card_view:cardCornerRadius="@dimen/card_corner_radius"
+        style="@style/CardBottom">
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="match_parent"
@@ -96,7 +95,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="match_parent"
-                android:padding="16dp">
+                android:padding="@dimen/content_padding">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -114,7 +113,7 @@
             <RelativeLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:padding="16dp">
+                android:padding="@dimen/content_padding">
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -130,6 +129,7 @@
                     style="@style/LabelValue"
                     android:id="@+id/txtVersion"
                     android:layout_toRightOf="@+id/txtLabelVersion"
+                    android:layout_toEndOf="@+id/txtLabelVersion"
                     android:text="@string/version_name" />
             </RelativeLayout>
         </LinearLayout>

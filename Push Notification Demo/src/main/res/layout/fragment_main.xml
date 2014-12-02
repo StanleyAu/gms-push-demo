@@ -1,165 +1,213 @@
 <ScrollView
     xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:card_view="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     tools:context=".MainActivity$PlaceholderFragment">
     <RelativeLayout
+        android:focusable="true"
+        android:focusableInTouchMode="true"
         android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:paddingLeft="@dimen/activity_horizontal_margin"
-        android:paddingRight="@dimen/activity_horizontal_margin"
-        android:paddingTop="@dimen/activity_vertical_margin"
-        android:paddingBottom="@dimen/activity_vertical_margin">
-
-        <EditText
+        android:layout_height="wrap_content">
+        <requestFocus/>
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardGcm"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:id="@+id/editSenderId"
-            android:layout_alignParentTop="false"
-            android:layout_alignParentLeft="false"
-            android:layout_alignParentStart="false"
-            android:hint="@string/hint_senderId"
-            android:layout_below="@+id/txtLabelGcm" />
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:minHeight="60dp"
-            android:padding="8dp"
-            android:layout_margin="8dp"
-            android:background="@drawable/border"
-            android:text="@string/not_registered"
-            android:id="@+id/txtRegistration"
-            android:textIsSelectable="true"
-            android:layout_below="@+id/editSenderId"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/register"
-            android:id="@+id/btnRegister"
-            android:layout_below="@+id/txtRegistration"
-            android:layout_toLeftOf="@+id/btnTest"
-            android:layout_toStartOf="@+id/btnTest"
-            android:enabled="false"/>
-
-        <Button
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/test"
-            android:id="@+id/btnTest"
-            android:layout_below="@+id/txtRegistration"
-            android:layout_alignParentRight="true"
-            android:layout_alignParentEnd="true"
-            android:enabled="false"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/gcm"
-            android:id="@+id/txtLabelGcm"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
             android:layout_alignParentTop="true"
-            style="@style/Section" />
+            card_view:cardCornerRadius="@dimen/card_corner_radius"
+            style="@style/CardTop">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gcm"
+                    android:id="@+id/txtLabelGcm"
+                    android:padding="@dimen/content_padding"
+                    style="@style/Section" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/darkDivider" />
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/content_padding">
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/editSenderId"
+                        android:layout_alignParentTop="true"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:hint="@string/hint_senderId" />
+                    <TextView
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:minHeight="60dp"
+                        android:layout_marginTop="8dp"
+                        android:text="@string/not_registered"
+                        android:id="@+id/txtRegistration"
+                        style="@style/PopulatedText"
+                        android:layout_below="@+id/editSenderId"/>
+                </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/darkDivider" />
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/button_container_padding">
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/register"
+                        android:id="@+id/btnRegister"
+                        android:enabled="false"
+                        style="@style/FlatButton"/>
 
-        <TextView
-            android:layout_width="wrap_content"
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/test"
+                        android:id="@+id/btnTest"
+                        android:enabled="false"
+                        android:visibility="gone"/>
+                </LinearLayout>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardGmsNotification"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="@string/gms_notification"
-            android:id="@+id/txtLabelGmsNotification"
-            android:layout_below="@+id/btnRegister"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            style="@style/Section"
-            android:layout_marginTop="16dp" />
+            android:layout_below="@id/cardGcm"
+            card_view:cardCornerRadius="@dimen/card_corner_radius"
+            style="@style/CardMiddle">
+            <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent">
+                <TextView
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:text="@string/gms_notification"
+                    android:id="@+id/txtLabelGmsNotification"
+                    android:padding="@dimen/content_padding"
+                    style="@style/Section" />
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/darkDivider"/>
+                <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/content_padding">
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:inputType="number"
+                        android:ems="10"
+                        android:id="@+id/editExpire"
+                        android:layout_alignParentLeft="true"
+                        android:layout_alignParentStart="true"
+                        android:layout_alignParentTop="true"
+                        android:hint="@string/hint_expiry" />
 
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/editFilter"
+                        android:layout_below="@+id/editExpire"
+                        android:hint="@string/hint_filter" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/editMessage"
+                        android:layout_below="@+id/editFilter"
+                        android:hint="@string/hint_message" />
+
+                    <EditText
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/editTag"
+                        android:layout_below="@+id/editMessage"
+                        android:hint="@string/hint_tag"/>
+                </RelativeLayout>
+                <View
+                    android:layout_width="match_parent"
+                    android:layout_height="1dp"
+                    android:background="@color/darkDivider"/>
+                <LinearLayout
+                    android:orientation="horizontal"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:padding="@dimen/button_container_padding">
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/subscribe"
+                        android:id="@+id/btnSubscribe"
+                        android:layout_weight="1"
+                        style="@style/FlatButton"/>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/cancel"
+                        android:id="@+id/btnCancel"
+                        android:layout_weight="1"
+                        style="@style/FlatButton"/>
+
+                    <Button
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="@string/publish"
+                        android:id="@+id/btnPublish"
+                        android:layout_weight="1"
+                        style="@style/FlatButton"/>
+                </LinearLayout>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
+        <android.support.v7.widget.CardView
+            android:id="@+id/cardGcmReceive"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_below="@id/cardGmsNotification"
+            card_view:cardCornerRadius="@dimen/card_corner_radius"
+            style="@style/CardBottom">
         <LinearLayout
-            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:layout_below="@+id/txtLabelGmsNotification"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:id="@+id/linearLayout">
-
-            <Button
+            android:layout_height="match_parent"
+            android:orientation="vertical">
+            <TextView
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="@string/subscribe"
-                android:id="@+id/btnSubscribe"
-                android:layout_weight="1" />
-
-            <Button
-                android:layout_width="wrap_content"
+                android:text="@string/receipt"
+                android:id="@+id/txtLabelReceipt"
+                android:padding="@dimen/content_padding"
+                style="@style/Section"/>
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="1dp"
+                android:id="@+id/dividerGcmReceive"
+                android:background="@color/darkDivider"/>
+            <TextView
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:text="@string/cancel"
-                android:id="@+id/btnCancel"
-                android:layout_weight="1" />
-
-            <Button
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="@string/publish"
-                android:id="@+id/btnPublish"
-                android:layout_weight="1" />
-        </LinearLayout>
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="number"
-            android:ems="10"
-            android:id="@+id/editExpire"
-            android:layout_below="@+id/linearLayout"
-            android:hint="@string/hint_expiry" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/editFilter"
-            android:layout_below="@+id/editExpire"
-            android:hint="@string/hint_filter" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/editMessage"
-            android:layout_below="@+id/editFilter"
-            android:hint="@string/hint_message" />
-
-        <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/editTag"
-            android:layout_below="@+id/editMessage"
-            android:hint="@string/hint_tag"/>
-
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="@string/receipt"
-            android:id="@+id/txtLabelReceipt"
-            android:layout_below="@+id/editTag"
-            android:layout_alignParentLeft="true"
-            android:layout_alignParentStart="true"
-            android:layout_marginTop="16dp"
-            style="@style/Section"/>
-
-        <TextView
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:id="@+id/txtReceipt"
-            android:background="@drawable/border"
-            android:layout_alignParentBottom="true"
-            android:layout_below="@+id/txtLabelReceipt"
-            android:minHeight="120dp"
-            android:layout_margin="8dp"
-            android:padding="8dp"
-            android:hint="@string/nothing"
-            android:textIsSelectable="true" />
-
+                android:id="@+id/txtReceipt"
+                android:minHeight="120dp"
+                android:layout_margin="@dimen/content_padding"
+                style="@style/PopulatedText"/>
+            </LinearLayout>
+        </android.support.v7.widget.CardView>
         <ProgressBar
             android:id="@+id/progressBar"
             android:layout_width="wrap_content"

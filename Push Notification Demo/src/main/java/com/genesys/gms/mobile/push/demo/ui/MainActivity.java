@@ -1,5 +1,7 @@
 package com.genesys.gms.mobile.push.demo.ui;
 
+import android.app.NotificationManager;
+import android.content.Context;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentTransaction;
@@ -7,6 +9,7 @@ import android.view.Menu;
 import android.view.MenuItem;
 import com.genesys.gms.mobile.push.demo.BaseActivity;
 import com.genesys.gms.mobile.push.demo.R;
+import com.genesys.gms.mobile.push.demo.data.push.GcmIntentService;
 import com.squareup.otto.Bus;
 
 import javax.inject.Inject;
@@ -18,14 +21,23 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
+
+        Bundle extras = getIntent().getExtras();
+        if(extras != null) {
+            // Determine if activity was started as a result of GCM notification
+            int notificationId = extras.getInt(GcmIntentService.GCM_NOTIFICATION_ID, -1);
+            if(notificationId != -1) {
+                NotificationManager manager = (NotificationManager)getSystemService(Context.NOTIFICATION_SERVICE);
+                manager.cancel(notificationId);
+            }
+        }
+
         setContentView(R.layout.activity_main);
         if (savedInstanceState == null) {
             currentFragment = new MainFragment();
             getSupportFragmentManager().beginTransaction()
                     .add(R.id.container, currentFragment)
                     .commit();
-        } else {
-            //currentFragment = getSupportFragmentManager().getFragment(savedInstanceState, "currentFragment");
         }
     }
 
@@ -45,7 +57,6 @@ public class MainActivity extends BaseActivity {
     @Override
     protected void onSaveInstanceState(Bundle outState) {
         super.onSaveInstanceState(outState);
-        //getSupportFragmentManager().putFragment(outState, "currentFragment", currentFragment);
     }
 
     @Override

@@ -24,8 +24,17 @@ public class App extends Application {
         applicationGraph = ObjectGraph.create(getModules().toArray());
         applicationGraph.inject(this);
 
+        registerManagers();
+    }
+
+    public void registerManagers() {
         bus.register(gcmManager);
         bus.register(notificationServiceManager);
+    }
+
+    public void unregisterManagers() {
+        bus.unregister(gcmManager);
+        bus.unregister(notificationServiceManager);
     }
 
     protected List<Object> getModules() {
