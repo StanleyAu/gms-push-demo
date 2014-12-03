@@ -98,7 +98,7 @@ public class GcmManager {
         }
 
         NotificationCompat.Builder builder =
-            getNotificationBuilder(R.drawable.ic_launcher, "GMS Push Demo", message);
+            getNotificationBuilder(R.drawable.ic_launcher, context.getResources().getString(R.string.launcher_name), message);
 
         // int notificationId = mNotifyId.getAndIncrement();
         Intent resultIntent = new Intent(context, MainActivity.class);

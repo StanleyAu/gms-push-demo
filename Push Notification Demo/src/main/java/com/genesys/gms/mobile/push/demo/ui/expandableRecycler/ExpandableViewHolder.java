@@ -1,7 +1,6 @@
 package com.genesys.gms.mobile.push.demo.ui.expandableRecycler;
 
 import android.animation.Animator;
-import android.animation.AnimatorSet;
 import android.animation.ValueAnimator;
 import android.annotation.TargetApi;
 import android.content.Context;
@@ -9,8 +8,6 @@ import android.os.Build;
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.view.ViewGroup;
-import android.view.animation.Animation;
-import android.view.animation.AnimationUtils;
 import android.widget.CheckBox;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -19,7 +16,6 @@ import butterknife.ButterKnife;
 import butterknife.InjectView;
 import butterknife.OnClick;
 import com.genesys.gms.mobile.push.demo.R;
-import com.genesys.gms.mobile.push.demo.ui.AnimatorHelper;
 import timber.log.Timber;
 
 /**

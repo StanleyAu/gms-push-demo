@@ -47,6 +47,8 @@ public class LogEntry {
 
     public enum MessageType {
         REQUEST,
-        RESPONSE
+        RESPONSE,
+        ERROR,
+        UNKNOWN
     }
 }

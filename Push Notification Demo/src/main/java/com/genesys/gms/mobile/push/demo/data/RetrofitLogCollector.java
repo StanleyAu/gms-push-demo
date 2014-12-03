@@ -15,6 +15,7 @@ import javax.inject.Singleton;
 public class RetrofitLogCollector {
     private static final String REQUEST_PREFIX = "--->";
     private static final String RESPONSE_PREFIX = "<---";
+    private static final String ERROR_PREFIX = "----";
 
     private final Bus bus;
     private DateTime timestamp;
@@ -35,23 +36,44 @@ public class RetrofitLogCollector {
     public synchronized void append(String message) {
         if(!title.isEmpty()) {
             builder.append(message);
-            if (message.startsWith(REQUEST_PREFIX)) {
-                messageType = LogEntry.MessageType.REQUEST;
+            if(message.startsWith(REQUEST_PREFIX) ||
+                message.startsWith(RESPONSE_PREFIX) ||
+                message.startsWith(ERROR_PREFIX)) {
                 shipIt();
-            } else if (message.startsWith(RESPONSE_PREFIX)) {
-                messageType = LogEntry.MessageType.RESPONSE;
-                shipIt();
+                return;
             }
             builder.append("\r\n");
         } else {
             // First message, extract title
             String[] tokens = message.split(" ");
-            if(tokens.length >= 3) {
-                title = tokens[1] + " " + tokens[2];
-            } else if(messageType == LogEntry.MessageType.REQUEST) {
-                title = "Request";
+            if(message.startsWith(REQUEST_PREFIX)) {
+                if(tokens.length >= 3) {
+                    title = tokens[1] + " " + tokens[2];
+                } else {
+                    title = "Request";
+                }
+                messageType = LogEntry.MessageType.REQUEST;
+            } else if(message.startsWith(RESPONSE_PREFIX)) {
+                if(tokens.length >= 3) {
+                    title = tokens[1] + " " + tokens[2];
+                } else {
+                    title = "Response";
+                }
+                messageType = LogEntry.MessageType.RESPONSE;
+            } else if(message.startsWith(ERROR_PREFIX)) {
+                if(tokens.length >= 2) {
+                    title = tokens[1];
+                } else {
+                    title = "Error";
+                }
+                messageType = LogEntry.MessageType.ERROR;
             } else {
-                title = "Response";
+                if(tokens.length >= 2) {
+                    title = tokens[1];
+                } else {
+                    title = "Unknown";
+                }
+                messageType = LogEntry.MessageType.UNKNOWN;
             }
             timestamp = DateTime.now();
             builder.append(message + "\r\n");

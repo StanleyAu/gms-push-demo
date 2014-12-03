@@ -35,11 +35,21 @@ public class ExpandableViewAdapter extends RecyclerView.Adapter<ExpandableViewHo
         LogEntry entry = logEntries.get(i);
         vh.reset();
         vh.title.setText(entry.getTitle());
-        // TODO: This might need to be a bit more flexible for theme changes
-        if(entry.getMessageType() == LogEntry.MessageType.REQUEST) {
-            vh.icon.setImageResource(R.drawable.ic_call_made_grey600_18dp);
-        } else {
-            vh.icon.setImageResource(R.drawable.ic_call_received_grey600_18dp);
+        switch (entry.getMessageType()) {
+            // TODO: Really, the model should just hold the image resource id
+            case REQUEST:
+                vh.icon.setImageResource(R.drawable.ic_call_made_grey600_18dp);
+                break;
+            case RESPONSE:
+                vh.icon.setImageResource(R.drawable.ic_call_received_grey600_18dp);
+                break;
+            case ERROR:
+                vh.icon.setImageResource(R.drawable.ic_error_grey600_18dp);
+                break;
+            case UNKNOWN:
+            default:
+                vh.icon.setImageResource(R.drawable.ic_warning_grey600_18dp);
+                break;
         }
         vh.timestamp.setText(
                 entry.getTimestamp().withZone(DateTimeZone.UTC).toString(
