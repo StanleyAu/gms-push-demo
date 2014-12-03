@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="version_code">10003</integer>
-    <string name="version_name">1.0.3</string>
+    <integer name="version_code">10004</integer>
+    <string name="version_name">1.0.4</string>
 
     <string name="app_name">Push Notification Demo</string>
     <string name="launcher_name">GMS Push Demo</string>

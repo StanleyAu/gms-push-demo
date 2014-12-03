@@ -6,6 +6,8 @@ import android.os.Bundle;
 import android.support.v4.app.FragmentTransaction;
 import android.support.v4.widget.DrawerLayout;
 import android.support.v7.app.ActionBarDrawerToggle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.MenuItem;
 import android.view.View;
 import butterknife.ButterKnife;
@@ -13,10 +15,16 @@ import butterknife.InjectView;
 import com.genesys.gms.mobile.push.demo.BaseActivity;
 import com.genesys.gms.mobile.push.demo.R;
 import com.genesys.gms.mobile.push.demo.data.push.GcmIntentService;
+import com.genesys.gms.mobile.push.demo.ui.expandableRecycler.ExpandableViewAdapter;
+import com.genesys.gms.mobile.push.demo.ui.expandableRecycler.LogEntry;
 import com.squareup.otto.Bus;
+import com.squareup.otto.Subscribe;
+import org.joda.time.DateTime;
 import timber.log.Timber;
 
 import javax.inject.Inject;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * The main application activity is only responsible for inflating fragments
@@ -26,6 +34,8 @@ public class MainActivity extends BaseActivity {
     @Inject Bus bus;
     ActionBarDrawerToggle mDrawerToggle;
     @InjectView(R.id.drawer_layout) DrawerLayout mDrawerLayout;
+    @InjectView(R.id.recycler_logcat) RecyclerView mRecycler;
+    private List<LogEntry> logEntries;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -64,6 +74,13 @@ public class MainActivity extends BaseActivity {
                     .add(R.id.container, new MainFragment())
                     .commit();
         }
+
+        logEntries = new ArrayList<LogEntry>();
+        LinearLayoutManager llm = new LinearLayoutManager(this);
+        llm.setOrientation(LinearLayoutManager.VERTICAL);
+        mRecycler.setLayoutManager(llm);
+        ExpandableViewAdapter adapter = new ExpandableViewAdapter(logEntries);
+        mRecycler.setAdapter(adapter);
     }
 
     @Override
@@ -122,5 +139,10 @@ public class MainActivity extends BaseActivity {
         }
 
         return super.onOptionsItemSelected(item);
+    }
+
+    @Subscribe public void onLogUpdate(LogEntry newEntry) {
+        logEntries.add(newEntry);
+        mRecycler.getAdapter().notifyDataSetChanged();
     }
 }
