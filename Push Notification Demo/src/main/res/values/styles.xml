@@ -1,4 +1,4 @@
-<resources>
+<resources xmlns:tools="http://schemas.android.com/tools">
 
     <!-- Base application theme. -->
     <style name="AppTheme" parent="Theme.AppCompat.Light.DarkActionBar">
@@ -24,6 +24,7 @@
         <item name="android:textSize">18sp</item>
         <item name="android:textColor">@color/darkSub</item>
     </style>
+
     <style name="CardBase" parent="AppTheme">
         <item name="android:layout_gravity">center</item>
         <item name="android:layout_marginTop">8dp</item>
@@ -41,17 +42,60 @@
     <style name="CardBottom" parent="CardBase">
         <item name="android:layout_marginTop">4dp</item>
     </style>
+
     <style name="PopulatedText" parent="AppTheme">
         <item name="android:background">@drawable/border</item>
         <item name="android:padding">8dp</item>
     </style>
+
     <style name="FlatButtonBase" parent="AppTheme">
         <item name="android:background">@drawable/flat_button</item>
-        <item name="android:textColor">@color/text_light</item>
+        <item name="android:textColor">@color/text_dark</item>
         <item name="android:textSize">14sp</item>
         <item name="android:textStyle">bold</item>
         <item name="android:height">48dp</item>
         <item name="android:minWidth">88dp</item>
     </style>
     <style name="FlatButton" parent="FlatButtonBase" />
+
+    <style name="PaddedIcon" parent="AppTheme">
+        <item name="android:padding">@dimen/content_padding</item>
+        <item name="android:minHeight">@dimen/icon_size</item>
+        <item name="android:minWidth">@dimen/icon_size</item>
+    </style>
+
+    <style name="CenteredCheckBox" parent="AppTheme">
+        <item name="android:layout_margin">@dimen/content_padding</item>
+        <item name="android:layout_gravity">center</item>
+        <item name="android:minHeight">@dimen/icon_size</item>
+        <item name="android:minWidth">@dimen/icon_size</item>
+    </style>
+
+    <style name="ExpandedContent" parent="AppTheme">
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:paddingBottom">@dimen/content_padding</item>
+        <item name="android:paddingRight">@dimen/content_padding</item>
+        <item name="android:paddingLeft">24dp</item>
+    </style>
+
+    <style name="CodeBase" parent="AppTheme">
+        <item name="android:textSize">12sp</item>
+        <item name="android:textColor">@color/darkText</item>
+    </style>
+    <style name="Code" parent="CodeBase"/>
+
+    <style name="Timestamp" parent="AppTheme">
+        <item name="android:gravity">end|right</item>
+        <item name="android:paddingTop">8dp</item>
+        <item name="android:textStyle">italic</item>
+        <item name="android:textSize">10sp</item>
+        <item name="android:textColor">@color/darkSub</item>
+    </style>
+
+    <style name="ListItemTitle" parent="AppTheme">
+        <item name="android:textSize">16sp</item>
+        <item name="android:textColor">@color/text_dark_accent</item>
+        <item name="android:paddingLeft">22dp</item>
+        <item name="android:paddingRight">22dp</item>
+    </style>
 </resources>

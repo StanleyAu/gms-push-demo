@@ -8,6 +8,10 @@ import android.support.v4.content.WakefulBroadcastReceiver;
 
 /**
  * Created by stau on 11/27/2014.
+ *
+ * Copy-pasta from Android GCM Client tutorial
+ * WakefulBroadcastReceiver is a variant of the BroadcastReceiver which
+ * holds a Wake-lock on the device as it hands work over to our IntentService
  */
 public class GcmBroadcastReceiver extends WakefulBroadcastReceiver {
     @Override

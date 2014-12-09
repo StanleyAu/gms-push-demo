@@ -8,12 +8,15 @@ import hugo.weaving.DebugLog;
 import retrofit.Callback;
 import retrofit.RetrofitError;
 import retrofit.client.Response;
+import timber.log.Timber;
 
 import javax.inject.Inject;
 import javax.inject.Singleton;
 
 /**
  * Created by stau on 30/11/2014.
+ * Manages GMS Notification API calls through Otto bus events.
+ * Note that almost all of the (HTTP) work is done by Retrofit.
  */
 @Singleton
 public class NotificationServiceManager {
@@ -28,6 +31,7 @@ public class NotificationServiceManager {
 
     // Define your interface
     @Subscribe public void onSubscribe(NotificationSubscribeEvent event) {
+        Timber.i("Handling GMS Notification Subscribe request: " + event.toString());
         notificationService.subscribe(event.gmsUser, event.notificationSubscription, new Callback<SubscriptionResponse>() {
             @Override
             public void success(SubscriptionResponse subscriptionResponse, Response response) {
@@ -36,12 +40,14 @@ public class NotificationServiceManager {
 
             @Override
             public void failure(RetrofitError error) {
+                Timber.e("Failed GMS Notification Subscribe: " + error.toString());
                 bus.post(new NotificationErrorEvent(error));
             }
         });
     }
 
     @Subscribe public void onDelete(NotificationDeleteEvent event) {
+        Timber.i("Handling GMS Notification Delete request: " + event.toString());
         notificationService.delete(event.subscriberId, new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
@@ -50,12 +56,14 @@ public class NotificationServiceManager {
 
             @Override
             public void failure(RetrofitError error) {
+                Timber.e("Failed GMS Notification Delete: " + error.toString());
                 bus.post(new NotificationErrorEvent(error));
             }
         });
     }
 
     @Subscribe public void onPublish(NotificationPublishEvent event) {
+        Timber.i("Handling GMS Notification Publish request: " + event.toString());
         notificationService.publish(event.notificationEvent, new Callback<Response>() {
             @Override
             public void success(Response response, Response response2) {
@@ -64,6 +72,7 @@ public class NotificationServiceManager {
 
             @Override
             public void failure(RetrofitError error) {
+                Timber.e("Failed GMS Notification Publish: " + error.toString());
                 bus.post(new NotificationErrorEvent(error));
             }
         });

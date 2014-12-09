@@ -11,6 +11,9 @@ import java.io.IOException;
 
 /**
  * Created by Stan on 11/30/2014.
+ *
+ * A send() call is only useful when the GCM-implementing server supports
+ * upstream messages from the GCM clients.
  */
 public class GcmSendAsync extends AsyncTask<Void, Void, Boolean> {
     private final GoogleCloudMessaging googleCloudMessaging;

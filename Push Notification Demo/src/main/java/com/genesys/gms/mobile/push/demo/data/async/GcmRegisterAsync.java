@@ -39,7 +39,7 @@ public class GcmRegisterAsync extends AsyncTask<Void, Void, String> {
         } else if(savedException!=null) {
             bus.post(new GcmErrorEvent(savedException));
         } else {
-            // Unknown error
+            // TODO: Log this unknown error
         }
     }
 }

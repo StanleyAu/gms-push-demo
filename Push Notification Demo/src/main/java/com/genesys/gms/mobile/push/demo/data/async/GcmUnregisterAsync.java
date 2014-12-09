@@ -10,6 +10,10 @@ import java.io.IOException;
 
 /**
  * Created by Stan on 11/30/2014.
+ *
+ * GCM unregister() is an expensive call that should normally never be
+ * used in a GCM client. However, we want to be able to hot-swap
+ * Sender IDs during runtime.
  */
 public class GcmUnregisterAsync extends AsyncTask<Void, Void, Boolean> {
     private final GoogleCloudMessaging googleCloudMessaging;

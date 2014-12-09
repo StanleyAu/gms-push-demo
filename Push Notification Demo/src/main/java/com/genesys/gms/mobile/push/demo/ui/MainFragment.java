@@ -22,24 +22,33 @@ import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationDetails;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationEvent;
 import com.genesys.gms.mobile.push.demo.data.api.pojo.NotificationSubscription;
 import com.genesys.gms.mobile.push.demo.data.otto.*;
+import com.genesys.gms.mobile.push.demo.data.retrofit.GmsEndpoint;
 import com.google.android.gms.common.ConnectionResult;
 import com.google.android.gms.common.GooglePlayServicesUtil;
 import com.squareup.otto.Bus;
 import com.squareup.otto.Subscribe;
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 import javax.inject.Inject;
 
+// TODO: Consider shipping off some of this code into a Presenter
+
 /**
  * Created by stau on 11/27/2014.
+ *
+ * Most of the action occurs in the MainFragment, which houses the controls
+ * for GCM registration and interacting with the GMS Notification API.
  */
 public class MainFragment extends BaseFragment {
+    // ButterKnife helps do all the findViewById work
     @InjectView(R.id.editSenderId) EditText editSenderId;
     @InjectView(R.id.txtRegistration) TextView txtRegistration;
     @InjectView(R.id.editExpire) EditText editExpire;
     @InjectView(R.id.editFilter) EditText editFilter;
     @InjectView(R.id.editMessage) EditText editMessage;
     @InjectView(R.id.editTag) EditText editTag;
+    @InjectView(R.id.checkBoxPublishToSelf) CheckBox checkBoxPublishToSelf;
     @InjectView(R.id.txtReceipt) TextView txtReceipt;
     @InjectView(R.id.btnRegister) Button btnRegister;
     @InjectView(R.id.btnUnregister) Button btnUnregister;
@@ -48,17 +57,21 @@ public class MainFragment extends BaseFragment {
     @Inject @ForActivity Context context;
     @Inject SharedPreferences sharedPreferences;
     @Inject Bus bus;
+    @Inject GmsEndpoint gmsEndpoint;
 
     public final static String PROPERTY_SENDER_ID = "sender_id";
     public final static String PROPERTY_REG_ID = "registration_id";
     private static final String PROPERTY_APP_VERSION = "app_version";
+    // private static final String PROPERTY_GMS_SUB_ID = "subscription_id";
     private final static int PLAY_SERVICES_RESOLUTION_REQUEST = 9000;
     private String m_strGcmRegId;
     private String m_strGmsSubId;
+    private Menu menu;
 
     @Override
     public void onCreate(Bundle savedInstanceState){
         super.onCreate(savedInstanceState);
+        // Tells the activity to use the fragment's Menu items in onCreateOptionsMenu()
         setHasOptionsMenu(true);
     }
 
@@ -74,12 +87,13 @@ public class MainFragment extends BaseFragment {
     public void onActivityCreated(Bundle savedInstanceState) {
         super.onActivityCreated(savedInstanceState);
         handleInstanceState(savedInstanceState);
-        checkPlayServicesAndGcm();
+        // checkPlayServicesAndGcm();
     }
 
     @Override
     public void onCreateOptionsMenu(Menu menu, MenuInflater inflater) {
         super.onCreateOptionsMenu(menu, inflater);
+        this.menu = menu;
         inflater.inflate(R.menu.menu_main, menu);
     }
 
@@ -120,6 +134,7 @@ public class MainFragment extends BaseFragment {
     private boolean checkPlayServices() {
         int resultCode = GooglePlayServicesUtil.isGooglePlayServicesAvailable(context);
         if(resultCode!= ConnectionResult.SUCCESS){
+            Timber.w("Google Play Services are not available.");
             if(GooglePlayServicesUtil.isUserRecoverableError(resultCode)) {
                 GooglePlayServicesUtil.getErrorDialog(resultCode, getActivity(), PLAY_SERVICES_RESOLUTION_REQUEST).show();
             } else {
@@ -135,12 +150,14 @@ public class MainFragment extends BaseFragment {
         String registrationId = sharedPreferences.getString(PROPERTY_REG_ID, "");
         if(registrationId.isEmpty()) {
             // No registration found
+            Timber.d("No saved Registration ID found.");
             return "";
         }
         int registeredVersion = sharedPreferences.getInt(PROPERTY_APP_VERSION, Integer.MIN_VALUE);
         int currentVersion = getAppVersion(context);
         if(registeredVersion!=currentVersion) {
             // Version changed
+            Timber.d("Version ID has changed and Registration ID is no longer valid.");
             return "";
         }
         return registrationId;
@@ -152,31 +169,46 @@ public class MainFragment extends BaseFragment {
                 .getPackageInfo(context.getPackageName(), 0);
             return packageInfo.versionCode;
         } catch (PackageManager.NameNotFoundException e) {
+            Timber.e(e, "Failed to obtain application version code.");
             throw new RuntimeException("Could not get package name: " + e);
         }
     }
 
     private static String getUniqueId(Context context) {
+        // TODO: Move this out for injection
         return Secure.getString(context.getContentResolver(), Secure.ANDROID_ID);
     }
 
+    /**
+     * Saves/Clears the GCM Registration ID in SharedPreferences.
+     * Synchronized to prevent two threads from somehow simultaneously
+     * mucking around with the GCM Registration ID.
+     *
+     * @param context Application context for retrieving application version code.
+     * @param regId GCM Registration ID to store. Empty if clearing persisted data.
+     */
+    @DebugLog
     private synchronized void storeRegistrationId(Context context, String regId) {
         m_strGcmRegId = regId;
         int appVersion = getAppVersion(context);
         SharedPreferences.Editor editor = sharedPreferences.edit();
-        if(regId==null) {
+        if(regId.isEmpty()) {
+            Timber.i("Clearing persisted Registration ID.");
             btnRegister.setEnabled(true);
             editor.remove(PROPERTY_REG_ID);
             editor.remove(PROPERTY_APP_VERSION);
         } else {
+            Timber.i("Saving new Registration ID: " + regId);
             btnUnregister.setEnabled(true);
             editor.putString(PROPERTY_REG_ID, regId);
             editor.putString(PROPERTY_SENDER_ID, getSenderId());
             editor.putInt(PROPERTY_APP_VERSION, appVersion);
         }
+        // apply() tells the editor to perform the save asynchronously.
         editor.apply();
     }
 
+    @DebugLog
     private void checkPlayServicesAndGcm() {
         if(checkPlayServices()){
             m_strGcmRegId = getRegistrationId(context);
@@ -189,6 +221,17 @@ public class MainFragment extends BaseFragment {
             }
             editSenderId.setText(sharedPreferences.getString(PROPERTY_SENDER_ID, ""));
         }
+    }
+
+    private boolean checkHostAndPortSet() {
+        if(!gmsEndpoint.isUrlSet()) {
+            // Lazy approach to getting the user to the settings page
+            Timber.w("Attempted to use GMS Notification API before configuring Host and Port settings.");
+            getActivity().onOptionsItemSelected(this.menu.findItem(R.id.action_settings));
+            Toast.makeText(context, "Warning: Set GMS settings first!", Toast.LENGTH_SHORT).show();
+            return false;
+        }
+        return true;
     }
 
     /**     FIELD GETTERS **/
@@ -237,22 +280,35 @@ public class MainFragment extends BaseFragment {
     /**     BUTTON HANDLERS **/
     @OnClick(R.id.btnRegister)
     public void handleRegister() {
+        Timber.i("Register button was clicked!");
         btnRegister.setEnabled(false);
         bus.post(new GcmRegisterEvent(getSenderId()));
     }
     @OnClick(R.id.btnUnregister)
     public void handleUnregister() {
+        Timber.i("Unregister button was clicked!");
         btnUnregister.setEnabled(false);
         bus.post(new GcmUnregisterEvent());
     }
     @OnClick(R.id.btnTest)
     public void handleTest() {
+        Timber.i("Test button was clicked!");
         Bundle data = new Bundle();
         data.putString("my_message", "Hello world!");
         bus.post(new GcmSendEvent(getSenderId(), data));
     }
     @OnClick(R.id.btnSubscribe)
     public void handleSubscribe() {
+        if(checkHostAndPortSet() == false)
+        {
+            Timber.i("Subscribe button was clicked but Host and Port were not configured.");
+            return;
+        }
+        if(m_strGcmRegId.isEmpty()){
+            Timber.i("Subscribe button was clicked but GCM is not registered.");
+            Toast.makeText(context, "Warning: Register GCM first!", Toast.LENGTH_SHORT).show();
+            return;
+        }
         String identifier = getUniqueId(context);
         NotificationSubscription notificationSubscription = new NotificationSubscription(
                 identifier,
@@ -263,28 +319,52 @@ public class MainFragment extends BaseFragment {
                 getExpire(),
                 getFilter()
         );
+        Timber.i("Subscribe button was clicked and request is posted: " + notificationSubscription.toString());
         bus.post(new NotificationSubscribeEvent(identifier, notificationSubscription));
     }
     @OnClick(R.id.btnCancel)
     public void handleCancel() {
+        if(checkHostAndPortSet() == false)
+        {
+            Timber.i("Cancel button was clicked but Host and Port were not configured.");
+            return;
+        }
+        Timber.i("Cancel button was clicked for Subscription ID: " + m_strGmsSubId);
         bus.post(new NotificationDeleteEvent(m_strGmsSubId));
     }
     @OnClick(R.id.btnPublish)
     public void handlePublish() {
-        NotificationEvent notificationEvent = new NotificationEvent(
-                getMessage(),
-                getMessageTag(),
-                NotificationEvent.MediaType.STRING,
-                m_strGcmRegId,
-                NotificationDetails.ClientType.GCM,
-                null
-        );
+        if(checkHostAndPortSet() == false)
+        {
+            Timber.i("Publish button was clicked but Host and Port were not configured.");
+            return;
+        }
+        NotificationEvent notificationEvent;
+        if(checkBoxPublishToSelf.isChecked()) {
+            notificationEvent = new NotificationEvent(
+                    getMessage(),
+                    getMessageTag(),
+                    NotificationEvent.MediaType.STRING,
+                    m_strGcmRegId,
+                    NotificationDetails.ClientType.GCM,
+                    null
+            );
+            Timber.i("Publish button was clicked with self as target: " + notificationEvent.toString());
+        } else {
+            notificationEvent = new NotificationEvent(
+                    getMessage(),
+                    getMessageTag(),
+                    NotificationEvent.MediaType.STRING
+            );
+            Timber.i("Publish button was clicked for broadcast: " + notificationEvent.toString());
+        }
         bus.post(new NotificationPublishEvent(notificationEvent));
     }
     @TargetApi(11)
     @OnClick(R.id.txtRegistration)
     public void handleRegistrationTouch() {
         try {
+            Timber.i("Copying Registration ID to clipboard.");
             int sdk = Build.VERSION.SDK_INT;
             if (sdk < Build.VERSION_CODES.HONEYCOMB) {
                 android.text.ClipboardManager clipboard = (android.text.ClipboardManager) context.getSystemService(context.CLIPBOARD_SERVICE);
@@ -296,6 +376,7 @@ public class MainFragment extends BaseFragment {
             }
             Toast.makeText(context, "Copied", Toast.LENGTH_SHORT).show();
         } catch (Exception e) {
+            Timber.e(e, "Encountered unknown exception while copying Registration ID.");
         }
     }
     /** END BUTTON HANDLERS **/
@@ -309,7 +390,7 @@ public class MainFragment extends BaseFragment {
         Toast.makeText(context, "Upstream message delivered.", Toast.LENGTH_SHORT).show();
     }
     @Subscribe public void onGcmUnregisterDone(GcmUnregisterDoneEvent event) {
-        storeRegistrationId(context, null);
+        storeRegistrationId(context, "");
         txtRegistration.setText(getResources().getString(R.string.not_registered));
         Toast.makeText(context, "Unregistered", Toast.LENGTH_SHORT).show();
     }
@@ -328,6 +409,7 @@ public class MainFragment extends BaseFragment {
         if(!event.isProduced()) {
             Toast.makeText(context, "Message received!", Toast.LENGTH_SHORT).show();
         }
+        Timber.d("Received a GCM message: " + event.toString());
     }
 
     @Subscribe public void onNotificationSubscribeDone(NotificationSubscribeDoneEvent event) {
@@ -335,7 +417,7 @@ public class MainFragment extends BaseFragment {
         Toast.makeText(context, "Subscribed (id:" + event.subscriptionResponse.getId() + ")", Toast.LENGTH_SHORT).show();
     }
     @Subscribe public void onNotificationDeleteDone(NotificationDeleteDoneEvent event) {
-        m_strGmsSubId = null;
+        m_strGmsSubId = "";
         Toast.makeText(context, "Subscription deleted.", Toast.LENGTH_SHORT).show();
     }
     @Subscribe public void onNotificationPublishDone(NotificationPublishDoneEvent event) {

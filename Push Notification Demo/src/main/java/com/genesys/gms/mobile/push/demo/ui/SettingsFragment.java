@@ -14,6 +14,7 @@ import com.genesys.gms.mobile.push.demo.ForApplication;
 import com.genesys.gms.mobile.push.demo.R;
 import com.genesys.gms.mobile.push.demo.data.retrofit.GmsEndpoint;
 import com.squareup.otto.Bus;
+import timber.log.Timber;
 
 import javax.inject.Inject;
 
@@ -74,6 +75,7 @@ public class SettingsFragment extends BaseFragment {
         String strApiVersion = editApiVersion.getText().toString().trim();
         if(host.isEmpty()||port.isEmpty()||strApiVersion.isEmpty()) {
             // Invalid, should notify
+            Timber.i("Attempted to save empty host and/or port fields.");
             return;
         }
         int version;
@@ -81,12 +83,13 @@ public class SettingsFragment extends BaseFragment {
             version = Integer.parseInt(strApiVersion);
         } catch (NumberFormatException e) {
             // Invalid API version
+            Timber.e(e, "Failed to read API version.");
             return;
         }
         gmsEndpoint.setUrl(host, port, version);
-        // TODO: Notify activity to change fragments
         storeHostSettings(host, port, version);
         Toast.makeText(context, "Saved", Toast.LENGTH_SHORT).show();
+        Timber.i("Save button clicked and settings persisted.");
     }
 
     private void storeHostSettings(String host, String port, int version) {

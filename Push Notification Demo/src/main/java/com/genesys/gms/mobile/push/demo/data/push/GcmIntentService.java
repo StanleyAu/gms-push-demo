@@ -18,18 +18,21 @@ import com.squareup.otto.DeadEvent;
 import com.squareup.otto.Produce;
 import com.squareup.otto.Subscribe;
 import hugo.weaving.DebugLog;
+import timber.log.Timber;
 
 import javax.inject.Inject;
 import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * Created by stau on 11/27/2014.
+ *
+ * Our IntentService's only responsibility is to produce a GcmReceiveEvent
+ * onto the Otto bus for the GcmManager or MainFragment to process
  */
 public class GcmIntentService extends BaseIntentService {
     @Inject Bus bus;
     public static final String GCM_NOTIFICATION_ID = "gcm_notification_id";
 
-    @DebugLog
     public GcmIntentService() {
         super("GcmIntentService");
     }
@@ -41,6 +44,7 @@ public class GcmIntentService extends BaseIntentService {
 
         GcmReceiveEvent event = new GcmReceiveEvent(intent, false);
         if(event.extras != null) {
+            // TODO: Handle specific GCM message types
             if (GoogleCloudMessaging.MESSAGE_TYPE_SEND_ERROR.equals(messageType)) {
                 // Send error
             } else if (GoogleCloudMessaging.MESSAGE_TYPE_DELETED.equals(messageType)) {
@@ -49,7 +53,7 @@ public class GcmIntentService extends BaseIntentService {
                 // Actual message to process
                 // Send to Activity via Bus (attn to threading)
             }
-            Log.d("GcmIntentService", event.extras.toString());
+            Timber.d("Posting GCM event into bus: " + event.toString());
         }
         bus.post(event);
 

@@ -1,10 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <integer name="version_code">10002</integer>
-    <string name="version_name">1.0.2</string>
+    <integer name="version_code">10004</integer>
+    <string name="version_name">1.0.4</string>
 
     <string name="app_name">Push Notification Demo</string>
     <string name="launcher_name">GMS Push Demo</string>
+    <string name="drawer_open">Open</string>
+    <string name="drawer_close">Close</string>
     <string name="hello_world">Hello world!</string>
     <string name="action_settings">Settings</string>
     <string name="action_done">Done</string>
@@ -16,6 +18,7 @@
     <string name="hint_host">Hostname or IP</string>
     <string name="hint_port">GMS HTTP Port</string>
     <string name="hint_apiVersion">API Version</string>
+    <string name="checkbox_publish_to_self">Publish to self</string>
     <string name="register">Register</string>
     <string name="unregister">Unregister</string>
     <string name="test">Test</string>
@@ -33,4 +36,9 @@
     <string name="nothing">Nothing yet&#8230; :)</string>
     <string name="registering">Registering</string>
     <string name="error">Error</string>
+
+    <string name="logcat_item_description">Request Type</string>
+    <string name="Example"><![CDATA[
+    HTTP POST http://ec2-54-147-250-15.compute-1.amazonaws.com:8080/genesys/1/subscription\nContent-Type: application/json\nContent:\n{\n    "foo":"bar"\n}
+    ]]></string>
 </resources>
